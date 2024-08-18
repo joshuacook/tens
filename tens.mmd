@@ -1,54 +1,11 @@
 ```mermaid
 classDiagram
     class Main {
-        -initializeModules()
-        -setupEventHandlers()
-    }
-    class InputHandler {
-        -params
-        -nornsModules
-        +init(params, nornsModules)
-        +handleKeyPress()
-        +handleEncoderRotation(encoderNumber, direction)
-        +handleGridPress(x, y, state)
-    }
-    class SequenceManager {
-        -params
-        -nornsModules
-        +init(params, nornsModules)
-        +currentSequence: Sequence
-        +currentPage: int
-        +loadSequence(name: string)
-        +saveSequence(name: string)
-        +modifyStep(device: int, page: int, step: int, sample: int, volume: int)
-        +nextPage()
-        +previousPage()
-    }
-    class Sequence {
-        +steps: int[3][2][16][8]  // [device][page][step][sample]
-        +getStep(device: int, page: int, step: int, sample: int): int
-        +setStep(device: int, page: int, step: int, sample: int, volume: int)
-    }
-    class SongManager {
-        -params
-        -nornsModules
-        +init(params, nornsModules)
-        +currentSong: Song
-        +loadSong(name: string)
-        +saveSong(name: string)
-        +nextSequence()
-    }
-    class Song {
-        +name: string
-        +sequences: Sequence[]
-        +metadata: object
-    }
-    class MIDIController {
-        -midi
-        +init(midi)
-        -DRUM_NOTE_MAP: int[]
-        +sendNote(channel: int, note: int, velocity: int)
-        +channels: int[3]  // MIDI channels for each drum device
+        -init()
+        -redraw()
+        -key(n, z)
+        -enc(n, d)
+        -cleanup()
     }
     class ClockManager {
         -clock
@@ -68,9 +25,59 @@ classDiagram
         +showMetadataPage()
         +refreshDisplay()
     }
+    class InputHandler {
+        -params
+        -nornsModules
+        +init(params, nornsModules)
+        +handleKeyPress()
+        +handleEncoderRotation(encoderNumber, direction)
+        +handleGridPress(x, y, state)
+    }
+    class MIDIController {
+        -midi
+        +init(midi)
+        -DRUM_NOTE_MAP: int[]
+        +sendNote(channel: int, note: int, velocity: int)
+        +channels: int[3]  // MIDI channels for each drum device
+    }
+    class Sequence {
+        +steps: int[3][2][16][8]  // [device][page][step][sample]
+        +getStep(device: int, page: int, step: int, sample: int): int
+        +setStep(device: int, page: int, step: int, sample: int, volume: int)
+    }
+    class SequenceManager {
+        -params
+        -nornsModules
+        +init(params, nornsModules)
+        +currentSequence: Sequence
+        +currentPage: int
+        +loadSequence(name: string)
+        +saveSequence(name: string)
+        +modifyStep(device: int, page: int, step: int, sample: int, volume: int)
+        +nextPage()
+        +previousPage()
+    }
+    class Song {
+        +name: string
+        +sequences: Sequence[]
+        +metadata: object
+    }
+    class SongManager {
+        -params
+        -sequenceManager
+        -yamlParser
+        -currentSong
+        -PATTERNS_DIRECTORY
+        +init(params, sequenceManager)
+        +loadSong(filename)
+        +saveSong()
+    }
     class YAMLParser {
-        +parse(yamlString: string): object
-        +stringify(object: object): string
+        +parse_song(content)
+        +parse_patterns(patterns_section)
+        +parse_single_pattern(pattern_str)
+        +serialize_song(song)
+        +serialize_single_pattern(pattern)
     }
     
     Main --> InputHandler : creates
