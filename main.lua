@@ -34,9 +34,7 @@ function init()
 
     redraw_metro = metro.init()
     redraw_metro.time = 1/15
-    redraw_metro.event = function()
-        if displayManager then displayManager:redraw() end
-    end
+    redraw_metro.event = function() displayManager:redraw() end
     redraw_metro:start()
     
     clockManager:addListener({
@@ -75,20 +73,7 @@ function init()
     params:set("current_pattern", 1) 
 end
 
-function redraw()
-    if displayManager then displayManager:redraw() end
-end
 
-function key(n, z)
-    inputHandler:handleKey(n, z)
-end
-
-function enc(n, d)
-    inputHandler:handleEnc(n, d)
-end
-
-function cleanup()
-    if midiController then
-        midiController:cleanup()
-    end
-end
+function redraw() displayManager:redraw() end
+function key(n, z) inputHandler:handleKey(n, z) end
+function enc(n, d) inputHandler:handleEnc(n, d) end

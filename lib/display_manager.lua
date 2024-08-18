@@ -42,7 +42,7 @@ function DisplayManager:showMetadataPage(show)
 end
 
 function DisplayManager:redraw()
-    if not self.dirty then return end
+    if not self.dirty or norns.menu.status() then return end
 
     self.screen.clear()
     self.screen.font_face(1)
