@@ -8,53 +8,53 @@ end
 
 function SequenceManager:init(midiController)
     self.midiController = midiController
-    self.currentPattern = nil
-    self.pages = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a", "drum3b"}
-    self.currentPageIndex = 1
-    self.sequencePage = self.pages[self.currentPageIndex]
+    self.currentScene = nil
+    self.sequences = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a", "drum3b"}
+    self.currentSequenceIndex = 1
+    self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
 
-function SequenceManager:loadPattern(pattern)
-    self.currentPattern = pattern
-    self.currentPageIndex = 1
-    self.sequencePage = self.pages[self.currentPageIndex]
+function SequenceManager:loadScene(scene)
+    self.currentScene = scene
+    self.currentSequenceIndex = 1
+    self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
 
-function SequenceManager:getCurrentSequence()
-    return self.currentPattern[self.sequencePage]
+function SequenceManager:getCurrentSequenceSteps()
+    return self.currentScene[self.currentSequence]
 end
 
 function SequenceManager:getCurrentStep(step)
     local result = {}
-    for _, page in ipairs(self.pages) do
-        local sequence = self.currentPattern[page]
-        if sequence then
-            result[page] = {}
+    for _, seq in ipairs(self.sequences) do
+        local sequenceSteps = self.currentScene[seq]
+        if sequenceSteps then
+            result[seq] = {}
             for i = 1, 8 do  -- 8 drums per sequence
                 local index = (i - 1) * 16 + step
-                result[page][i] = sequence.steps[index] or 0
+                result[seq][i] = sequenceSteps[index] or 0
             end
         end
     end
     return result
 end
 
-function SequenceManager:setStep(page, drum, step, value)
-    local sequence = self.currentPattern[page]
-    if sequence then
+function SequenceManager:setStep(sequence, drum, step, value)
+    local sequenceSteps = self.currentScene[sequence]
+    if sequenceSteps then
         local index = (drum - 1) * 16 + step
-        sequence[index] = value
+        sequenceSteps[index] = value
     end
 end
 
-function SequenceManager:nextPage()
-    self.currentPageIndex = (self.currentPageIndex % #self.pages) + 1
-    self.sequencePage = self.pages[self.currentPageIndex]
+function SequenceManager:nextSequence()
+    self.currentSequenceIndex = (self.currentSequenceIndex % #self.sequences) + 1
+    self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
 
-function SequenceManager:previousPage()
-    self.currentPageIndex = ((self.currentPageIndex - 2 + #self.pages) % #self.pages) + 1
-    self.sequencePage = self.pages[self.currentPageIndex]
+function SequenceManager:previousSequence()
+    self.currentSequenceIndex = ((self.currentSequenceIndex - 2 + #self.sequences) % #self.sequences) + 1
+    self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
 
 return SequenceManager

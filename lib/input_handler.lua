@@ -36,25 +36,25 @@ function InputHandler:handleEnc(n, d)
     if n == 1 then
         self.params:delta("clock_tempo", d)
     elseif n == 2 then
-        self.params:delta("current_pattern", d)
+        self.params:delta("current_scene", d)
     elseif n == 3 then
         if d > 0 then
-            self.sequenceManager:nextPage()
+            self.sequenceManager:nextSequence()
         else
-            self.sequenceManager:previousPage()
+            self.sequenceManager:previousSequence()
         end
-        self.displayManager:updateSequencePage(self.sequenceManager.sequencePage)
+        self.displayManager:updateSequencePage(self.sequenceManager.currentSequence)
         self:redrawGrid()
     end
 end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then  -- button pressed
-        local currentSequence = self.sequenceManager:getCurrentSequence()
+        local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()
         local index = (y - 1) * 16 + x
-        local currentValue = currentSequence[y].steps[x] or 0
+        local currentValue = currentSequenceSteps[index] or 0
         local newValue = (currentValue + 1) % 4  -- cycle through 0-3
-        self.sequenceManager:setStep(y, x, newValue)
+        self.sequenceManager:setStep(self.sequenceManager.currentSequence, y, x, newValue)
 
         self:updateGridLED(x, y, newValue)
     end
@@ -74,8 +74,7 @@ function InputHandler:redrawGrid()
     end
     my_grid:all(0)  -- Clear the grid
     
-    local currentSequence = self.sequenceManager:getCurrentSequence()
-    local currentSequenceSteps = currentSequence.steps
+    local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()
     for row = 1, 8 do
         for step = 1, 16 do
             local index = (row - 1) * 16 + step

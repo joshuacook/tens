@@ -4,8 +4,8 @@
 <bpm>
 92
 </bpm>
-<patterns>
-<pattern>
+<scenes>
+<scene>
 <drum1a>
  2 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0
  0 0 0 0 2 0 0 0 0 0 0 0 2 0 0 0
@@ -66,8 +66,8 @@
  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 </drum3b>
-</pattern>
-<pattern>
+</scene>
+<scene>
 <drum1a>
  2 1 2 1 2 0 0 0 2 0 0 0 2 0 0 0 
  0 0 0 0 2 0 0 1 0 1 0 0 0 1 0 1 
@@ -128,5 +128,5 @@
  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 </drum3b>
-</pattern>
-</patterns>
+</scene>
+</scenes>

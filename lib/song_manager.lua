@@ -13,11 +13,11 @@ function SongManager:init(params, sequenceManager)
     self.sequenceManager = sequenceManager
     self.xmlParser = XMLParser.new()
     self.currentSong = nil
-    self.PATTERNS_DIRECTORY = _path.dust .. "code/tens/songs/"
+    self.SONGS_DIRECTORY = _path.dust .. "code/tens/songs/"
 end
 
 function SongManager:loadSong(filename)
-    local full_path = self.PATTERNS_DIRECTORY .. filename
+    local full_path = self.SONGS_DIRECTORY .. filename
     local file, err = io.open(full_path, "r")
 
     if not file then
@@ -39,28 +39,26 @@ function SongManager:loadSong(filename)
 
     self.params:set("clock_tempo", self.currentSong.bpm or 120)
 
-    if #self.currentSong.patterns > 0 then
-        print("Loading first pattern:")
-        print(#self.currentSong.patterns)
-        first_pattern = self.currentSong.patterns[1]
-        print(#first_pattern)
-        print(#first_pattern["drum1a"])
-        self.sequenceManager:loadPattern(first_pattern)
+    if #self.currentSong.scenes > 0 then
+        print("Loading first scene:")
+        print("Number of scenes: " .. #self.currentSong.scenes)
+        local first_scene = self.currentSong.scenes[1]
+        self.sequenceManager:loadScene(first_scene)
     else
-        print("No patterns found in the song")
+        print("No scenes found in the song")
     end
 
     return true
 end
 
-function SongManager:loadPattern(patternIndex)
-    if not self.currentSong or not self.currentSong.patterns[patternIndex] then
-        print("Error: Invalid pattern index")
+function SongManager:loadScene(sceneIndex)
+    if not self.currentSong or not self.currentSong.scenes[sceneIndex] then
+        print("Error: Invalid scene index")
         return false
     end
 
-    local pattern = self.currentSong.patterns[patternIndex]
-    self.sequenceManager:loadPattern(pattern)
+    local scene = self.currentSong.scenes[sceneIndex]
+    self.sequenceManager:loadScene(scene)
     return true
 end
 
@@ -71,7 +69,7 @@ function SongManager:saveSong()
     end
 
     local filename = self.currentSong.filename
-    local full_path = self.PATTERNS_DIRECTORY .. filename
+    local full_path = self.SONGS_DIRECTORY .. filename
     local file, err = io.open(full_path, "w")
     if file then
         file:write(self.xmlParser:serialize_song(self.currentSong))
@@ -83,27 +81,27 @@ function SongManager:saveSong()
     end
 end
 
-function SongManager:getCurrentPatternIndex()
-    for i, pattern in ipairs(self.currentSong.patterns) do
-        if pattern == self.sequenceManager.currentPattern then
+function SongManager:getCurrentSceneIndex()
+    for i, scene in ipairs(self.currentSong.scenes) do
+        if scene == self.sequenceManager.currentScene then
             return i
         end
     end
     return nil
 end
 
-function SongManager:nextPattern()
-    local currentIndex = self:getCurrentPatternIndex()
-    if currentIndex and currentIndex < #self.currentSong.patterns then
-        return self:loadPattern(currentIndex + 1)
+function SongManager:nextScene()
+    local currentIndex = self:getCurrentSceneIndex()
+    if currentIndex and currentIndex < #self.currentSong.scenes then
+        return self:loadScene(currentIndex + 1)
     end
     return false
 end
 
-function SongManager:previousPattern()
-    local currentIndex = self:getCurrentPatternIndex()
+function SongManager:previousScene()
+    local currentIndex = self:getCurrentSceneIndex()
     if currentIndex and currentIndex > 1 then
-        return self:loadPattern(currentIndex - 1)
+        return self:loadScene(currentIndex - 1)
     end
     return false
 end

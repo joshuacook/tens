@@ -58,14 +58,22 @@ classDiagram
         +previousPage()
     }
     class Song {
-        +name: string
-        +sequences: Sequence[]
-        +metadata: object
+        +title: string
+        +bpm: int
+        +scenes: Scene[]
+    }
+    class Scene {
+        +drum1a: int[128]
+        +drum1b: int[128]
+        +drum2a: int[128]
+        +drum2b: int[128]
+        +drum3a: int[128]
+        +drum3b: int[128]
     }
     class SongManager {
         -params
         -sequenceManager
-        -yamlParser
+        -xmlParser
         -currentSong
         -PATTERNS_DIRECTORY
         +init(params, sequenceManager)
@@ -88,11 +96,12 @@ classDiagram
     SequenceManager --> Sequence : manages
     SequenceManager --> MIDIController : triggers
     SongManager --> Song : manages
+    Song --> Scene : contains
     SongManager --> SequenceManager : controls
     ClockManager --> SequenceManager : syncs
     ClockManager --> DisplayManager : updates
     SequenceManager --> DisplayManager : updates
     SongManager --> DisplayManager : updates
-    SequenceManager --> YAMLParser : uses
-    SongManager --> YAMLParser : uses
+    SequenceManager --> XMLParser : uses
+    SongManager --> XMLParser : uses
 ```

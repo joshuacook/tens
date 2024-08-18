@@ -7,7 +7,6 @@ local SequenceManager = include('lib/sequence_manager')
 local SongManager = include('lib/song_manager')
 
 function init()
-
     local my_grid = grid.connect()
     print("Grid connected:", my_grid.device)
 
@@ -45,16 +44,16 @@ function init()
             local stepInMeasure = (beat - 1) * 4 + sixteenthNote
     
             local stepData = sequenceManager:getCurrentStep(stepInMeasure)
-            for page, drums in pairs(stepData) do
-                local deviceIndex = math.ceil(tonumber(page:sub(5, 5)) / 2)
-                local isPageB = page:sub(-1) == "b"
+            for seq, drums in pairs(stepData) do
+                local deviceIndex = math.ceil(tonumber(seq:sub(5, 5)) / 2)
+                local isSequenceB = seq:sub(-1) == "b"
                 for drumIndex, value in ipairs(drums) do
-                    if isPageB then
+                    if isSequenceB then
                         drumIndex = drumIndex + 8
                     end
                     if value > 0 then
                         print(deviceIndex, drumIndex, value)
-                        local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 1
+                        local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 3
                         midiController:sendNote(deviceIndex, drumIndex, velocity)
                     end
                 end
@@ -80,16 +79,15 @@ function init()
         end
     })
 
-    params:add_number("current_pattern", "Current Pattern", 1, #songManager.currentSong.patterns, 1)
-    params:set_action("current_pattern", function(value)
-        sequenceManager:loadPattern(songManager.currentSong.patterns[value])
-        displayManager:updateCurrentPattern(value)
+    params:add_number("current_scene", "Current Scene", 1, #songManager.currentSong.scenes, 1)
+    params:set_action("current_scene", function(value)
+        songManager:loadScene(value)
+        displayManager:updateCurrentSequence(sequenceManager.currentSequence)
         inputHandler:redrawGrid()
     end)
     inputHandler:redrawGrid()
-    params:set("current_pattern", 1) 
+    params:set("current_scene", 1) 
 end
-
 
 function redraw() displayManager:redraw() end
 function key(n, z) inputHandler:handleKey(n, z) end

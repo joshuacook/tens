@@ -10,7 +10,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.screen = screen
     self.sequenceManager = sequenceManager
     self.songManager = songManager
-    self.sequencePage = self.sequenceManager.sequencePage
+    self.currentSequence = self.sequenceManager.currentSequence
     self.params = params
     self.bpm = self.params:get("clock_tempo")
     self.measureCount = 1
@@ -21,25 +21,21 @@ end
 function DisplayManager:updateMeasureCount(count)
     self.measureCount = count
     self:redraw()
-    self.dirty = true
 end
 
 function DisplayManager:updateBPM(bpm)
     self.bpm = self.params:get("clock_tempo")
     self:redraw()
-    self.dirty = true
 end
 
-function DisplayManager:updateSequencePage(page)
-    self.sequencePage = page
+function DisplayManager:updateCurrentSequence(sequence)
+    self.currentSequence = sequence
     self:redraw()
-    self.dirty = true
 end
 
 function DisplayManager:showMetadataPage(show)
     self.isMetadataPage = show
     self:redraw()
-    self.dirty = true
 end
 
 function DisplayManager:redraw()
@@ -66,7 +62,7 @@ function DisplayManager:drawMainPage()
     self.screen.text("BPM: " .. self.bpm)
 
     self.screen.move(0, 30)
-    self.screen.text("Page: " .. self.sequencePage)
+    self.screen.text("Sequence: " .. self.currentSequence)
 
     local beatPosition = (self.measureCount - 1) % 4 + 1
     for i = 1, 4 do
@@ -77,19 +73,27 @@ function DisplayManager:drawMainPage()
             self.screen.stroke()
         end
     end
+
+    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
+    self.screen.move(0, 40)
+    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
 end
 
 function DisplayManager:drawMetadataPage()
     self.screen.move(0, 10)
     self.screen.text("Metadata Page")
     
-    -- Add more metadata information here
-    -- For example:
-    self.screen.move(0, 30)
-    self.screen.text("Song: My Awesome Track")
-    self.screen.move(0, 40)
-    self.screen.text("Created: 2023-08-17")
-    -- ... add more metadata as needed
+    if self.songManager.currentSong then
+        self.screen.move(0, 30)
+        self.screen.text("Song: " .. self.songManager.currentSong.title)
+        self.screen.move(0, 40)
+        self.screen.text("BPM: " .. self.songManager.currentSong.bpm)
+        self.screen.move(0, 50)
+        self.screen.text("Scenes: " .. #self.songManager.currentSong.scenes)
+    else
+        self.screen.move(0, 30)
+        self.screen.text("No song loaded")
+    end
 end
 
 return DisplayManager
