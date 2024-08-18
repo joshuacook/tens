@@ -6,13 +6,14 @@ function InputHandler.new()
     return setmetatable({}, InputHandler)
 end
 
-function InputHandler:init(params, clockManager, displayManager, sequenceManager)
+function InputHandler:init(params, clockManager, displayManager, sequenceManager, grid)
     self.params = params
     self.clockManager = clockManager
     self.displayManager = displayManager
     self.sequenceManager = sequenceManager
-    
+
     self.grid = grid.connect()
+    print("Grid connected:", self.grid.device)   
     self.grid.key = function(x, y, z)
         self:handleGridPress(x, y, z)
     end

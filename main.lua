@@ -15,6 +15,7 @@ function init()
     
     midiController = MIDIController.new()
     midiController:init(midi)
+    midiController:connect()
     
     sequenceManager = SequenceManager.new()
     sequenceManager:init(midiController)
@@ -23,10 +24,10 @@ function init()
     songManager:init(params, sequenceManager)
     
     inputHandler = InputHandler.new()
-    inputHandler:init(params, clockManager, displayManager, sequenceManager)
+    inputHandler:init(params, clockManager, displayManager, sequenceManager, grid)
 
     songManager:loadSong("default_song.yaml")
-    
+
     redraw_metro = metro.init()
     redraw_metro.time = 1/15
     redraw_metro.event = function()

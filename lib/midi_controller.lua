@@ -20,7 +20,12 @@ function MIDIController:connect()
     for i = 1, 3 do
         self.devices[i] = midi.connect(i)
         if self.devices[i] then
-            print("Connected to MIDI device " .. i)
+            if self.devices[i].name == "Midihub MH-13F7475 " .. i then  
+                print("Connected to MIDI device " .. self.devices[i].name)
+            else
+                print("Error: Expected MIDI device 'Midihub MH-13F7475 " .. i .. "', but found '" .. self.devices[i].name .. "'")
+                os.exit(1)
+            end
         else
             print("Failed to connect to MIDI device " .. i)
         end
