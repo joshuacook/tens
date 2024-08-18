@@ -1,0 +1,94 @@
+```mermaid
+classDiagram
+    class Main {
+        -initializeModules()
+        -setupEventHandlers()
+    }
+    class InputHandler {
+        -params
+        -nornsModules
+        +init(params, nornsModules)
+        +handleKeyPress()
+        +handleEncoderRotation(encoderNumber, direction)
+        +handleGridPress(x, y, state)
+    }
+    class SequenceManager {
+        -params
+        -nornsModules
+        +init(params, nornsModules)
+        +currentSequence: Sequence
+        +currentPage: int
+        +loadSequence(name: string)
+        +saveSequence(name: string)
+        +modifyStep(device: int, page: int, step: int, sample: int, volume: int)
+        +nextPage()
+        +previousPage()
+    }
+    class Sequence {
+        +steps: int[3][2][16][8]  // [device][page][step][sample]
+        +getStep(device: int, page: int, step: int, sample: int): int
+        +setStep(device: int, page: int, step: int, sample: int, volume: int)
+    }
+    class SongManager {
+        -params
+        -nornsModules
+        +init(params, nornsModules)
+        +currentSong: Song
+        +loadSong(name: string)
+        +saveSong(name: string)
+        +nextSequence()
+    }
+    class Song {
+        +name: string
+        +sequences: Sequence[]
+        +metadata: object
+    }
+    class MIDIController {
+        -midi
+        +init(midi)
+        -DRUM_NOTE_MAP: int[]
+        +sendNote(channel: int, note: int, velocity: int)
+        +channels: int[3]  // MIDI channels for each drum device
+    }
+    class ClockManager {
+        -clock
+        +init(clock)
+        +bpm: int
+        +currentMeasure: int
+        +start()
+        +stop()
+        +tick()
+    }
+    class DisplayManager {
+        -screen
+        +init(screen)
+        +updateMeasureCount(count: int)
+        +updateBPM(bpm: int)
+        +updateSequencePage(page: string)
+        +showMetadataPage()
+        +refreshDisplay()
+    }
+    class YAMLParser {
+        +parse(yamlString: string): object
+        +stringify(object: object): string
+    }
+    
+    Main --> InputHandler : creates
+    Main --> SequenceManager : creates
+    Main --> SongManager : creates
+    Main --> MIDIController : creates
+    Main --> ClockManager : creates
+    Main --> DisplayManager : creates
+    InputHandler --> SequenceManager : modifies
+    InputHandler --> SongManager : controls
+    SequenceManager --> Sequence : manages
+    SequenceManager --> MIDIController : triggers
+    SongManager --> Song : manages
+    SongManager --> SequenceManager : controls
+    ClockManager --> SequenceManager : syncs
+    ClockManager --> DisplayManager : updates
+    SequenceManager --> DisplayManager : updates
+    SongManager --> DisplayManager : updates
+    SequenceManager --> YAMLParser : uses
+    SongManager --> YAMLParser : uses
+```
