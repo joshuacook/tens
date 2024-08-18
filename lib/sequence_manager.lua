@@ -26,10 +26,12 @@ end
 
 function SequenceManager:getCurrentStep(step)
     local subPattern = self:getCurrentSubPattern()
+    if not subPattern then return {} end
+    
     local result = {}
     for i, row in ipairs(subPattern) do
         result[i] = {
-            value = row[step],
+            value = row.steps[step],
             sample_name = row.sample_name,
             volume = row.volume
         }
@@ -39,8 +41,8 @@ end
 
 function SequenceManager:setStep(row, step, value)
     local subPattern = self:getCurrentSubPattern()
-    if subPattern[row] then
-        subPattern[row][step] = value
+    if subPattern and subPattern[row] then
+        subPattern[row].steps[step] = value
     end
 end
 

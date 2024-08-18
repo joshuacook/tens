@@ -72,12 +72,9 @@ classDiagram
         +loadSong(filename)
         +saveSong()
     }
-    class YAMLParser {
+    class XMLParser {
         +parse_song(content)
-        +parse_patterns(patterns_section)
-        +parse_single_pattern(pattern_str)
         +serialize_song(song)
-        +serialize_single_pattern(pattern)
     }
     
     Main --> InputHandler : creates

@@ -9,36 +9,77 @@ end
 function YAMLParser:parse_song(content)
     local song = {}
     local patterns = {}
-    
-    -- Parse title and bpm
+
     song.title = content:match("title:%s*\"(.-)\"")
+    print("Title:", song.title)
     song.bpm = tonumber(content:match("bpm:%s*(%d+)"))
-    
+    print("BPM:", song.bpm)
+
     -- Parse patterns
-    for pattern_content in content:gmatch("%-name:%s*\"(.-)\"(.-)\n[%s%-]") do
-        local pattern = {}
-        pattern.name = pattern_content:match("\"(.-)\"")
+    for pattern_chunk in content:gmatch("  -%s*name:%s*\"(.-)\"(.-)\n  %-") do
+        local pattern_name, pattern_content = pattern_chunk:match("(.-)\"(.+)")
         
-        for drum, drum_content in pattern_content:gmatch("(drum%da):%s*|(.-)\n[%s%w]") do
-            pattern[drum] = {}
-            for line in drum_content:gmatch("[^\n]+") do
-                local steps = {}
-                for step in line:gmatch("%d+") do
-                    table.insert(steps, tonumber(step))
+        print("Parsing pattern:", pattern.name)
+        print("Pattern content (first 100 characters):", pattern_content:sub(1, 100))
+
+        for drum_section in pattern_content:gmatch("    (drum%d[ab]):%s*|(.-)\n    %w") do
+            local drum_key, drum_data = drum_section:match("(drum%d[ab]):%s*|(.+)")
+            pattern[drum_key] = {}
+            print("  Parsing drum section:", drum_key)
+            print("  Drum data (first 50 characters):", drum_data:sub(1, 50))
+
+            for line in drum_data:gmatch("[^\n]+") do
+                line = line:gsub("^%s+", "") -- Remove leading spaces
+                local parts = {}
+                for part in line:gmatch("%S+") do
+                    table.insert(parts, part)
                 end
-                local sample_name, volume = line:match("(%w+)%s+(%d+)$")
-                table.insert(pattern[drum], {
-                    steps = steps,
-                    sample_name = sample_name,
-                    volume = tonumber(volume)
-                })
+                
+                if #parts >= 18 then
+                    local steps = {}
+                    for i = 1, 16 do
+                        steps[i] = tonumber(parts[i]) or 0
+                    end
+                    local sample = parts[17]
+                    local level = tonumber(parts[18]) or 1
+
+                    table.insert(pattern[drum_key], {
+                        steps = steps,
+                        sample_name = sample,
+                        volume = level
+                    })
+                    print("    Parsed line:", sample, level, table.concat(steps, " "))
+                end
             end
         end
-        
+
         table.insert(patterns, pattern)
+        print("Pattern added. Current pattern count:", #patterns)
     end
-    
+
     song.patterns = patterns
+    print("Total patterns in song:", #song.patterns)
+
+    -- Debug: Print structure of first pattern
+    if #song.patterns > 0 then
+        print("Structure of first pattern:")
+        for k, v in pairs(song.patterns[1]) do
+            if type(v) == "table" then
+                print("  " .. k .. ": (table with " .. #v .. " entries)")
+                for i, entry in ipairs(v) do
+                    print("    Entry " .. i .. ":")
+                    print("      Sample: " .. tostring(entry.sample_name))
+                    print("      Volume: " .. tostring(entry.volume))
+                    print("      Steps: " .. table.concat(entry.steps, " "))
+                end
+            else
+                print("  " .. k .. ": " .. tostring(v))
+            end
+        end
+    else
+        print("No patterns parsed!")
+    end
+
     return song
 end
 

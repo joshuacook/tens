@@ -7,6 +7,10 @@ local SequenceManager = include('lib/sequence_manager')
 local SongManager = include('lib/song_manager')
 
 function init()
+
+    local my_grid = grid.connect()
+    print("Grid connected:", my_grid.device)
+
     clockManager = ClockManager.new()
     clockManager:init(clock, params)
 
@@ -24,9 +28,9 @@ function init()
     songManager:init(params, sequenceManager)
     
     inputHandler = InputHandler.new()
-    inputHandler:init(params, clockManager, displayManager, sequenceManager, grid)
+    inputHandler:init(params, clockManager, displayManager, sequenceManager)
 
-    songManager:loadSong("default_song.yaml")
+    songManager:loadSong("default_song.xml")
 
     redraw_metro = metro.init()
     redraw_metro.time = 1/15
@@ -40,11 +44,9 @@ function init()
             local measure, beat = clockManager:getCurrentPosition()
             displayManager:updateMeasureCount(measure)
             
-            -- Update sequence based on current beat
             local currentStep = (beat - 1) % 16 + 1
             local stepData = sequenceManager:getCurrentStep(currentStep)
             
-            -- Trigger MIDI notes based on stepData
             for i, data in ipairs(stepData) do
                 if data.value > 0 then
                     local midiNote = midiController:getMIDINoteForSample(data.sample_name)
@@ -53,7 +55,6 @@ function init()
                 end
             end
             
-            -- Move to next pattern if needed
             if beat == 1 and measure % 4 == 0 then -- Adjust this logic as needed
                 sequenceManager:nextPattern()
             end
@@ -70,6 +71,8 @@ function init()
         displayManager:updateCurrentPattern(value)
         inputHandler:redrawGrid()
     end)
+    inputHandler:redrawGrid()
+    params:set("current_pattern", 1) 
 end
 
 function redraw()

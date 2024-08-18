@@ -15,7 +15,6 @@ function ClockManager:init(clock, params)
     self.clockId = nil
     self.listeners = {}
 
-    -- Set up a parameter watcher for clock_tempo
     params:set_action("clock_tempo", function(bpm)
         self:onBPMChange(bpm)
     end)
@@ -86,6 +85,14 @@ function ClockManager:notifyListeners(event, data)
         if listener[event] then
             listener[event](data)
         end
+    end
+end
+
+function ClockManager:togglePlay()
+    if self.isPlaying then
+        self:stop()
+    else
+        self:start()
     end
 end
 

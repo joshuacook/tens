@@ -6,16 +6,21 @@ function InputHandler.new()
     return setmetatable({}, InputHandler)
 end
 
-function InputHandler:init(params, clockManager, displayManager, sequenceManager, grid)
+local my_grid = grid.connect()
+
+function InputHandler:init(params, clockManager, displayManager, sequenceManager)
     self.params = params
     self.clockManager = clockManager
     self.displayManager = displayManager
     self.sequenceManager = sequenceManager
 
-    self.grid = grid.connect()
-    print("Grid connected:", self.grid.device)   
-    self.grid.key = function(x, y, z)
-        self:handleGridPress(x, y, z)
+    if my_grid then
+        my_grid.key = function(x, y, z)
+            self:handleGridPress(x, y, z)
+        end
+        print("Grid initialized successfully")
+    else
+        print("Warning: Grid not provided or nil")
     end
 end
 
@@ -57,19 +62,32 @@ end
 
 function InputHandler:updateGridLED(x, y, volume)
     local brightness = volume * 4  -- Scale 0-3 to 0-12 (assume 16 brightness levels)
-    self.grid:led(x, y, brightness)
-    self.grid:refresh()
+    my_grid:led(x, y, brightness)
+    my_grid:refresh()
 end
 
 function InputHandler:redrawGrid()
-    local currentDevice = self.sequenceManager:getCurrentDevice()
-    local currentPage = self.sequenceManager:getCurrentPage()
-    for x = 1, 16 do
-        for y = 1, 8 do
-            local volume = self.sequenceManager:getStep(currentDevice, currentPage, x, y)
-            self:updateGridLED(x, y, volume)
+    print("Redrawing grid")
+    if not my_grid then
+        print("Grid not initialized")
+        return
+    end
+    my_grid:all(0)  -- Clear the grid
+    
+    local currentSubPattern = self.sequenceManager:getCurrentSubPattern()
+    local currentSubPatternSteps = currentSubPattern.steps
+    print("Current sub-pattern:", type(currentSubPattern))
+    
+    for row = 1, 8 do
+        for step = 1, 16 do
+            local index = (row - 1) * 16 + step
+            local brightness = currentSubPatternSteps[index] or 0
+            print(step, row, brightness)
+            my_grid:led(step, row, brightness * 4)  -- Assuming brightness is 0-3, scale to 0-12
         end
     end
+    
+    my_grid:refresh()
 end
 
 return InputHandler
