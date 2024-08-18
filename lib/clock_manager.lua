@@ -14,8 +14,10 @@ function ClockManager:init(clock, params)
     self.isPlaying = false
     self.clockId = nil
     self.listeners = {}
+    self.bpm = params:get("clock_tempo")
 
     params:set_action("clock_tempo", function(bpm)
+        self.bpm = bpm
         self:onBPMChange(bpm)
     end)
 end

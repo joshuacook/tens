@@ -25,7 +25,7 @@ function init()
     songManager:init(params, sequenceManager)
     
     displayManager = DisplayManager.new()
-    displayManager:init(screen, sequenceManager, songManager)
+    displayManager:init(screen, params, sequenceManager, songManager)
     
     inputHandler = InputHandler.new()
     inputHandler:init(params, clockManager, displayManager, sequenceManager)
@@ -58,7 +58,7 @@ function init()
             end
         end,
         bpm = function(newBPM)
-            displayManager:updateBPM(newBPM)
+            displayManager:updateBPM()
             midiController:updateTempo(newBPM) -- If your MIDI controller needs to know about tempo changes
         end
     })

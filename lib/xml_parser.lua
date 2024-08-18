@@ -17,7 +17,8 @@ function XMLParser:parse_song(content)
 
     song.title = content:match("<title>%s*(.-)%s*</title>")
 
-    song.bpm = tonumber(content:match("<bpm>%s*(%d+)%s*</bpm>"))
+    song.bpm = tonumber(content:match("<bpm>(%d+)</bpm>"))
+    print("Song bpm:", song.bpm)
 
     for pattern_chunk in content:gmatch("<pattern>(.-)</pattern>") do
         local pattern = {}

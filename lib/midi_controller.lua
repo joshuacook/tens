@@ -88,4 +88,8 @@ function MIDIController:sendAllNotesOff(deviceIndex)
     end
 end
 
+function MIDIController:updateTempo(bpm)
+    print("MIDI Tempo updated to " .. bpm)
+end
+
 return MIDIController

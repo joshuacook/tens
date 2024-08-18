@@ -6,12 +6,13 @@ function DisplayManager.new()
     return setmetatable({}, DisplayManager)
 end
 
-function DisplayManager:init(screen, sequenceManager, songManager)
+function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.screen = screen
     self.sequenceManager = sequenceManager
     self.songManager = songManager
     self.sequencePage = self.sequenceManager.sequencePage
-    self.bpm = 120
+    self.params = params
+    self.bpm = self.params:get("clock_tempo")
     self.measureCount = 1
     self.isMetadataPage = false
     self.dirty = true
@@ -24,7 +25,7 @@ function DisplayManager:updateMeasureCount(count)
 end
 
 function DisplayManager:updateBPM(bpm)
-    self.bpm = bpm
+    self.bpm = self.params:get("clock_tempo")
     self:redraw()
     self.dirty = true
 end
