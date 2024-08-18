@@ -6,11 +6,13 @@ function DisplayManager.new()
     return setmetatable({}, DisplayManager)
 end
 
-function DisplayManager:init(screen)
+function DisplayManager:init(screen, sequenceManager, songManager)
     self.screen = screen
+    self.sequenceManager = sequenceManager
+    self.songManager = songManager
+    self.sequencePage = self.sequenceManager.sequencePage
+    self.bpm = self.songManager.bpm
     self.measureCount = 1
-    self.bpm = 120
-    self.sequencePage = "Drum 1a"
     self.isMetadataPage = false
     self.dirty = true
 end

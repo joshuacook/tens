@@ -11,6 +11,7 @@ function SequenceManager:init(midiController)
     self.currentPattern = nil
     self.currentDrum = 1
     self.currentPage = "a"
+    self.sequencePage = string.format("drum%d%s", self.currentDrum, self.currentPage)
 end
 
 function SequenceManager:loadPattern(pattern)
@@ -20,8 +21,7 @@ function SequenceManager:loadPattern(pattern)
 end
 
 function SequenceManager:getCurrentSubPattern()
-    local key = string.format("drum%d%s", self.currentDrum, self.currentPage)
-    return self.currentPattern[key]
+    return self.currentPattern[self.sequencePage]
 end
 
 function SequenceManager:getCurrentStep(step)

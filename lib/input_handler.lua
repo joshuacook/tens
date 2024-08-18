@@ -82,7 +82,6 @@ function InputHandler:redrawGrid()
         for step = 1, 16 do
             local index = (row - 1) * 16 + step
             local brightness = currentSubPatternSteps[index] or 0
-            print(step, row, brightness)
             my_grid:led(step, row, brightness * 4)  -- Assuming brightness is 0-3, scale to 0-12
         end
     end

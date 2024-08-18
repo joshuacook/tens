@@ -13,9 +13,6 @@ function init()
 
     clockManager = ClockManager.new()
     clockManager:init(clock, params)
-
-    displayManager = DisplayManager.new()
-    displayManager:init(screen)
     
     midiController = MIDIController.new()
     midiController:init(midi)
@@ -26,6 +23,9 @@ function init()
     
     songManager = SongManager.new()
     songManager:init(params, sequenceManager)
+    
+    displayManager = DisplayManager.new()
+    displayManager:init(screen, sequenceManager, songManager)
     
     inputHandler = InputHandler.new()
     inputHandler:init(params, clockManager, displayManager, sequenceManager)
