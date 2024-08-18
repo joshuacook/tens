@@ -30,6 +30,13 @@ end
 
 function DisplayManager:updateCurrentSequence(sequence)
     self.currentSequence = sequence
+    self.dirty = true
+    self:redraw()
+end
+
+function DisplayManager:updateCurrentScene(scene)
+    self.currentScene = scene
+    self.dirty = true
     self:redraw()
 end
 
@@ -66,7 +73,7 @@ function DisplayManager:drawMainPage()
 
     local beatPosition = (self.measureCount - 1) % 4 + 1
     for i = 1, 4 do
-        self.screen.circle(30 + i * 15, 50, 3)
+        self.screen.circle(30 + i * 15, 45, 3)
         if i == beatPosition then
             self.screen.fill()
         else
@@ -77,6 +84,8 @@ function DisplayManager:drawMainPage()
     local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 40)
     self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
+    self.screen.move(0, 60)
+    self.screen.text("E2: scene // E3: sequence")
 end
 
 function DisplayManager:drawMetadataPage()

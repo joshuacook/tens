@@ -11,8 +11,31 @@ function MIDIController:init(midi)
     self.devices = {}
     self.channels = {1, 2, 3}  -- Default MIDI channels for each drum device
     self.DRUM_NOTE_MAP = {
-        -- Roland drum note mapping
-        36, 38, 40, 41, 43, 45, 47, 48, 50, 52, 53, 55, 57, 59, 60, 62
+        -- Roland 808 drum note mapping
+        -- //------------- 1a ----------//
+        -- | Note | Sound | Pad | Level |
+        -- |------|-------|-----|-------|
+        -- | 36   | Kick  |  9  |   69  |
+        -- | 38   | Snare | 10  |  127  |
+        -- | 42   | Cl HH |  3  |  127  |
+        -- | 46   | Op HH |  4  |  127  |
+        -- | 41   | LTom  | 11  |   48  |
+        -- | 45   | MTom  | 12  |   48  |
+        -- | 48   | HTom  | 13  |   48  |
+        -- | 49   | Cymbl |  5  |  127  |
+        -- //------------- 1b ----------//
+        -- | Note | Sound | Pad | Level |
+        -- |------|-------|-----|-------|
+        -- | 62   | HCong | 14  |   60  |
+        -- | 63   | MCong | 15  |   87  |
+        -- | 64   | LCong | 16  |   64  |
+        -- | 37   | Rim   |  1  |   77  |
+        -- | 39   | Clap  |  2  |   97  |
+        -- | 51   | Clave |  6  |  127  |
+        -- | 54   | Mrcas |  7  |  117  |
+        -- | 56   | Cbell |  8  |  127  |
+        -- //---------------------------//
+        36, 38, 42, 46, 41, 45, 48, 49, 62, 63, 64, 37, 39, 51, 54, 56
     }
 end
 
@@ -33,11 +56,7 @@ function MIDIController:connect()
 end
 
 function MIDIController:setChannel(deviceIndex, channel)
-    if deviceIndex >= 1 and deviceIndex <= 3 then
-        self.channels[deviceIndex] = channel
-    else
-        print("Invalid device index. Must be between 1 and 3.")
-    end
+    self.channels[deviceIndex] = channel
 end
 
 function MIDIController:sendNote(deviceIndex, sampleIndex, velocity)
@@ -72,7 +91,7 @@ function MIDIController:sendAllNotesOff(deviceIndex)
 end
 
 function MIDIController:updateTempo(bpm)
-    print("MIDI Tempo updated to " .. bpm)
+    -- TODO: Implement MIDI tempo update
 end
 
 return MIDIController

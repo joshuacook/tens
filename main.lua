@@ -52,7 +52,6 @@ function init()
                         drumIndex = drumIndex + 8
                     end
                     if value > 0 then
-                        print(deviceIndex, drumIndex, value)
                         local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 3
                         midiController:sendNote(deviceIndex, drumIndex, velocity)
                     end

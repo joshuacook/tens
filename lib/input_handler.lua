@@ -37,13 +37,15 @@ function InputHandler:handleEnc(n, d)
         self.params:delta("clock_tempo", d)
     elseif n == 2 then
         self.params:delta("current_scene", d)
+        local currentScene = self.songManager:getCurrentSceneIndex()
+        self.displayManager:updateCurrentScene(currentScene)
     elseif n == 3 then
         if d > 0 then
             self.sequenceManager:nextSequence()
         else
             self.sequenceManager:previousSequence()
         end
-        self.displayManager:updateSequencePage(self.sequenceManager.currentSequence)
+        self.displayManager:updateCurrentSequence(self.sequenceManager.currentSequence)
         self:redrawGrid()
     end
 end
