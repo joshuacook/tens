@@ -11,7 +11,7 @@ function DisplayManager:init(screen, sequenceManager, songManager)
     self.sequenceManager = sequenceManager
     self.songManager = songManager
     self.sequencePage = self.sequenceManager.sequencePage
-    self.bpm = self.songManager.bpm
+    self.bpm = 120
     self.measureCount = 1
     self.isMetadataPage = false
     self.dirty = true
@@ -58,19 +58,15 @@ function DisplayManager:redraw()
 end
 
 function DisplayManager:drawMainPage()
-    -- Draw measure count
     self.screen.move(0, 10)
     self.screen.text("Measure: " .. self.measureCount)
 
-    -- Draw BPM
     self.screen.move(0, 20)
     self.screen.text("BPM: " .. self.bpm)
 
-    -- Draw current sequence page
     self.screen.move(0, 30)
     self.screen.text("Page: " .. self.sequencePage)
 
-    -- Draw a visual metronome
     local beatPosition = (self.measureCount - 1) % 4 + 1
     for i = 1, 4 do
         self.screen.circle(30 + i * 15, 50, 3)

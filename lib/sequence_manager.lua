@@ -9,27 +9,27 @@ end
 function SequenceManager:init(midiController)
     self.midiController = midiController
     self.currentPattern = nil
-    self.currentDrum = 1
-    self.currentPage = "a"
-    self.sequencePage = string.format("drum%d%s", self.currentDrum, self.currentPage)
+    self.pages = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a", "drum3b"}
+    self.currentPageIndex = 1
+    self.sequencePage = self.pages[self.currentPageIndex]
 end
 
 function SequenceManager:loadPattern(pattern)
     self.currentPattern = pattern
-    self.currentDrum = 1
-    self.currentPage = "a"
+    self.currentPageIndex = 1
+    self.sequencePage = self.pages[self.currentPageIndex]
 end
 
-function SequenceManager:getCurrentSubPattern()
+function SequenceManager:getCurrentSequence()
     return self.currentPattern[self.sequencePage]
 end
 
 function SequenceManager:getCurrentStep(step)
-    local subPattern = self:getCurrentSubPattern()
-    if not subPattern then return {} end
+    local sequence = self:getCurrentSequence()
+    if not sequence then return {} end
     
     local result = {}
-    for i, row in ipairs(subPattern) do
+    for i, row in ipairs(sequence) do
         result[i] = {
             value = row.steps[step],
             sample_name = row.sample_name,
@@ -40,32 +40,20 @@ function SequenceManager:getCurrentStep(step)
 end
 
 function SequenceManager:setStep(row, step, value)
-    local subPattern = self:getCurrentSubPattern()
-    if subPattern and subPattern[row] then
-        subPattern[row].steps[step] = value
+    local sequence = self:getCurrentSequence()
+    if sequence and sequence[row] then
+        sequence[row].steps[step] = value
     end
 end
 
 function SequenceManager:nextPage()
-    if self.currentPage == "a" then
-        self.currentPage = "b"
-    else
-        self.currentDrum = (self.currentDrum % 3) + 1
-        self.currentPage = "a"
-    end
+    self.currentPageIndex = (self.currentPageIndex % #self.pages) + 1
+    self.sequencePage = self.pages[self.currentPageIndex]
 end
 
 function SequenceManager:previousPage()
-    if self.currentPage == "b" then
-        self.currentPage = "a"
-    else
-        self.currentDrum = ((self.currentDrum - 2 + 3) % 3) + 1
-        self.currentPage = "b"
-    end
-end
-
-function SequenceManager:getCurrentPageName()
-    return string.format("Drum %d%s", self.currentDrum, self.currentPage)
+    self.currentPageIndex = ((self.currentPageIndex - 2 + #self.pages) % #self.pages) + 1
+    self.sequencePage = self.pages[self.currentPageIndex]
 end
 
 return SequenceManager

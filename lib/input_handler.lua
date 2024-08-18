@@ -43,20 +43,20 @@ function InputHandler:handleEnc(n, d)
         else
             self.sequenceManager:previousPage()
         end
-        self.displayManager:updateCurrentPage(self.sequenceManager:getCurrentPageName())
+        self.displayManager:updateSequencePage(self.sequenceManager.sequencePage)
+        self:redrawGrid()
     end
 end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then  -- button pressed
-        local currentDevice = self.sequenceManager:getCurrentDevice()
-        local currentPage = self.sequenceManager:getCurrentPage()
-        local currentVolume = self.sequenceManager:getStep(currentDevice, currentPage, x, y)
-        local newVolume = (currentVolume + 1) % 4  -- cycle through 0-3
-        self.sequenceManager:setStep(currentDevice, currentPage, x, y, newVolume)
-        
-        -- Update grid LED
-        self:updateGridLED(x, y, newVolume)
+        local currentSequence = self.sequenceManager:getCurrentSequence()
+        local index = (y - 1) * 16 + x
+        local currentValue = currentSequence[y].steps[x] or 0
+        local newValue = (currentValue + 1) % 4  -- cycle through 0-3
+        self.sequenceManager:setStep(y, x, newValue)
+
+        self:updateGridLED(x, y, newValue)
     end
 end
 
@@ -74,15 +74,13 @@ function InputHandler:redrawGrid()
     end
     my_grid:all(0)  -- Clear the grid
     
-    local currentSubPattern = self.sequenceManager:getCurrentSubPattern()
-    local currentSubPatternSteps = currentSubPattern.steps
-    print("Current sub-pattern:", type(currentSubPattern))
-    
+    local currentSequence = self.sequenceManager:getCurrentSequence()
+    local currentSequenceSteps = currentSequence.steps
     for row = 1, 8 do
         for step = 1, 16 do
             local index = (row - 1) * 16 + step
-            local brightness = currentSubPatternSteps[index] or 0
-            my_grid:led(step, row, brightness * 4)  -- Assuming brightness is 0-3, scale to 0-12
+            local value = currentSequenceSteps[index] or 0
+            my_grid:led(step, row, value * 5)
         end
     end
     
