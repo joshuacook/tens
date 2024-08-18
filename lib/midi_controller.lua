@@ -41,31 +41,14 @@ function MIDIController:setChannel(deviceIndex, channel)
 end
 
 function MIDIController:sendNote(deviceIndex, sampleIndex, velocity)
-    if deviceIndex < 1 or deviceIndex > 3 then
-        print("Invalid device index. Must be between 1 and 3.")
-        return
-    end
-
-    if sampleIndex < 1 or sampleIndex > 16 then
-        print("Invalid sample index. Must be between 1 and 16.")
-        return
-    end
-
-    local device = self.devices[deviceIndex]
-    if not device then
-        print("MIDI device " .. deviceIndex .. " is not connected.")
-        return
-    end
-
     local channel = self.channels[deviceIndex]
     local note = self.DRUM_NOTE_MAP[sampleIndex]
 
-    device:note_on(note, velocity, channel)
+    self.devices[deviceIndex]:note_on(note, velocity, channel)
 
-    -- Schedule note off
     clock.run(function()
-        clock.sleep(0.1)  -- 100ms note duration
-        device:note_off(note, 0, channel)
+        clock.sleep(0.1)
+        self.devices[deviceIndex]:note_off(note, 0, channel)
     end)
 end
 

@@ -41,7 +41,10 @@ function SongManager:loadSong(filename)
 
     if #self.currentSong.patterns > 0 then
         print("Loading first pattern:")
+        print(#self.currentSong.patterns)
         first_pattern = self.currentSong.patterns[1]
+        print(#first_pattern)
+        print(#first_pattern["drum1a"])
         self.sequenceManager:loadPattern(first_pattern)
     else
         print("No patterns found in the song")

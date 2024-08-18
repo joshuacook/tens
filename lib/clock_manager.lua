@@ -11,6 +11,7 @@ function ClockManager:init(clock, params)
     self.params = params
     self.currentMeasure = 1
     self.currentBeat = 1
+    self.currentStep = 1
     self.isPlaying = false
     self.clockId = nil
     self.listeners = {}
@@ -35,6 +36,7 @@ function ClockManager:stop()
         self.clock.cancel(self.clockId)
         self.currentMeasure = 1
         self.currentBeat = 1
+        self.currentStep = 1
         self:notifyListeners("stop")
     end
 end
@@ -42,18 +44,23 @@ end
 function ClockManager:clockLoop()
     while self.isPlaying do
         self:tick()
-        self.clock.sync(1/4)  -- Sync to quarter notes
+        self.clock.sync(1/4)
     end
 end
 
 function ClockManager:tick()
     self:notifyListeners("tick")
     
-    self.currentBeat = self.currentBeat + 1
-    if self.currentBeat > 4 then  -- Assuming 4/4 time signature
-        self.currentBeat = 1
-        self.currentMeasure = self.currentMeasure + 1
-        self:notifyListeners("measure")
+    self.currentStep = self.currentStep + 1
+    if self.currentStep > 4 then
+        self.currentStep = 1
+        self.currentBeat = self.currentBeat + 1
+        if self.currentBeat > 4 then
+            self.currentBeat = 1
+            self.currentMeasure = self.currentMeasure + 1
+            self:notifyListeners("measure")
+        end
+        self:notifyListeners("beat")
     end
 end
 
@@ -62,7 +69,7 @@ function ClockManager:onBPMChange(bpm)
 end
 
 function ClockManager:getCurrentPosition()
-    return self.currentMeasure, self.currentBeat
+    return self.currentMeasure, self.currentBeat, self.currentStep
 end
 
 function ClockManager:getCurrentBPM()

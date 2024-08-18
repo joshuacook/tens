@@ -39,27 +39,44 @@ function init()
     
     clockManager:addListener({
         tick = function()
-            local measure, beat = clockManager:getCurrentPosition()
+            local measure, beat, sixteenthNote = clockManager:getCurrentPosition()
             displayManager:updateMeasureCount(measure)
-            
-            local currentStep = (beat - 1) % 16 + 1
-            local stepData = sequenceManager:getCurrentStep(currentStep)
-            
-            for i, data in ipairs(stepData) do
-                if data.value > 0 then
-                    local midiNote = midiController:getMIDINoteForSample(data.sample_name)
-                    local velocity = math.floor(data.value * data.volume * 127)
-                    midiController:sendNote(i, midiNote, velocity)
+    
+            local stepInMeasure = (beat - 1) * 4 + sixteenthNote
+    
+            local stepData = sequenceManager:getCurrentStep(stepInMeasure)
+            for page, drums in pairs(stepData) do
+                local deviceIndex = math.ceil(tonumber(page:sub(5, 5)) / 2)
+                local isPageB = page:sub(-1) == "b"
+                for drumIndex, value in ipairs(drums) do
+                    if isPageB then
+                        drumIndex = drumIndex + 8
+                    end
+                    if value > 0 then
+                        print(deviceIndex, drumIndex, value)
+                        local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 1
+                        midiController:sendNote(deviceIndex, drumIndex, velocity)
+                    end
                 end
             end
             
-            if beat == 1 and measure % 4 == 0 then -- Adjust this logic as needed
-                sequenceManager:nextPattern()
+            if sixteenthNote == 1 and beat == 1 then
+                -- Add any per-measure logic here
+            end
+            
+            if sixteenthNote == 1 then
+                -- Add any per-beat logic here
+            end
+            
+            if sixteenthNote == 1 and beat == 1 and measure % 4 == 0 then
+                -- This executes every 4 measures
+                -- Add your logic here
             end
         end,
-        bpm = function(newBPM)
+        
+        bpm = function(newBpm)
             displayManager:updateBPM()
-            midiController:updateTempo(newBPM) -- If your MIDI controller needs to know about tempo changes
+            midiController:updateTempo(newBpm) -- If your MIDI controller needs to know about tempo changes
         end
     })
 

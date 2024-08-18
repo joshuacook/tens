@@ -25,24 +25,25 @@ function SequenceManager:getCurrentSequence()
 end
 
 function SequenceManager:getCurrentStep(step)
-    local sequence = self:getCurrentSequence()
-    if not sequence then return {} end
-    
     local result = {}
-    for i, row in ipairs(sequence) do
-        result[i] = {
-            value = row.steps[step],
-            sample_name = row.sample_name,
-            volume = row.volume
-        }
+    for _, page in ipairs(self.pages) do
+        local sequence = self.currentPattern[page]
+        if sequence then
+            result[page] = {}
+            for i = 1, 8 do  -- 8 drums per sequence
+                local index = (i - 1) * 16 + step
+                result[page][i] = sequence.steps[index] or 0
+            end
+        end
     end
     return result
 end
 
-function SequenceManager:setStep(row, step, value)
-    local sequence = self:getCurrentSequence()
-    if sequence and sequence[row] then
-        sequence[row].steps[step] = value
+function SequenceManager:setStep(page, drum, step, value)
+    local sequence = self.currentPattern[page]
+    if sequence then
+        local index = (drum - 1) * 16 + step
+        sequence[index] = value
     end
 end
 
