@@ -16,6 +16,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.measureCount = 1
     self.isMetadataPage = false
     self.dirty = true
+    self.isPlaying = false
 end
 
 function DisplayManager:updateMeasureCount(count)
@@ -65,21 +66,20 @@ function DisplayManager:drawMainPage()
     self.screen.move(0, 10)
     self.screen.text("Measure: " .. self.measureCount)
 
+    self.screen.circle(60, 10, 5)
+    if self.isPlaying then
+        self.screen.circle(60, 10, 4)
+        self.screen.circle(60, 10, 3)
+        self.screen.circle(60, 10, 2)
+        self.screen.circle(60, 10, 1)
+
+    end
+
     self.screen.move(0, 20)
     self.screen.text("BPM: " .. self.bpm)
 
     self.screen.move(0, 30)
     self.screen.text("Sequence: " .. self.currentSequence)
-
-    local beatPosition = (self.measureCount - 1) % 4 + 1
-    for i = 1, 4 do
-        self.screen.circle(30 + i * 15, 45, 3)
-        if i == beatPosition then
-            self.screen.fill()
-        else
-            self.screen.stroke()
-        end
-    end
 
     local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 40)

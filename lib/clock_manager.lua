@@ -6,7 +6,7 @@ function ClockManager.new()
     return setmetatable({}, ClockManager)
 end
 
-function ClockManager:init(clock, params)
+function ClockManager:init(clock, params, displayManager)
     self.clock = clock
     self.params = params
     self.currentMeasure = 1
@@ -16,6 +16,7 @@ function ClockManager:init(clock, params)
     self.clockId = nil
     self.listeners = {}
     self.bpm = params:get("clock_tempo")
+    self.displayManager = displayManager
 
     params:set_action("clock_tempo", function(bpm)
         self.bpm = bpm
@@ -26,6 +27,8 @@ end
 function ClockManager:start()
     if not self.isPlaying then
         self.isPlaying = true
+        self.displayManager.isPlaying = true
+        self.displayManager:redraw()
         self.clockId = self.clock.run(function() self:clockLoop() end)
     end
 end
@@ -33,11 +36,13 @@ end
 function ClockManager:stop()
     if self.isPlaying then
         self.isPlaying = false
+        self.displayManager.isPlaying = false
         self.clock.cancel(self.clockId)
         self.currentMeasure = 1
         self.currentBeat = 1
         self.currentStep = 1
         self:notifyListeners("stop")
+        self.displayManager:redraw()
     end
 end
 

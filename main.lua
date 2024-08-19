@@ -9,9 +9,6 @@ local SongManager = include('lib/song_manager')
 function init()
     local my_grid = grid.connect()
     print("Grid connected:", my_grid.device)
-
-    clockManager = ClockManager.new()
-    clockManager:init(clock, params)
     
     midiController = MIDIController.new()
     midiController:init()
@@ -24,9 +21,12 @@ function init()
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)
+
+    clockManager = ClockManager.new()
+    clockManager:init(clock, params, displayManager)
     
     inputHandler = InputHandler.new()
-    inputHandler:init(params, clockManager, displayManager, sequenceManager)
+    inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager)
 
     songManager:loadSong("default_song.xml")
 

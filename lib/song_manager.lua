@@ -14,6 +14,7 @@ function SongManager:init(params, sequenceManager)
     self.xmlParser = XMLParser.new()
     self.currentSong = nil
     self.SONGS_DIRECTORY = _path.dust .. "code/tens/songs/"
+    self.sceneCount = 0
 end
 
 function SongManager:loadSong(filename)
@@ -36,12 +37,13 @@ function SongManager:loadSong(filename)
 
     self.currentSong = song
     self.currentSong.filename = filename
+    self.sceneCount = #self.currentSong.scenes
 
     self.params:set("clock_tempo", self.currentSong.bpm or 120)
 
-    if #self.currentSong.scenes > 0 then
+    if self.sceneCount > 0 then
         print("Loading first scene:")
-        print("Number of scenes: " .. #self.currentSong.scenes)
+        print("Number of scenes: " .. self.sceneCount)
         local first_scene = self.currentSong.scenes[1]
         self.sequenceManager:loadScene(first_scene)
     else
