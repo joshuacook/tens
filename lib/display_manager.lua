@@ -20,7 +20,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.pages = {"main", "metadata", "sequence", "load_save"}
     self.currentPageIndex = 1
 
-    self.currentFile = "001.xml"
+    self.currentFileName = "001.xml"
     self.confirmationModal = {active = false, action = nil, message = ""}
 end
 
@@ -70,7 +70,7 @@ function DisplayManager:togglePlay()
 end
 
 function DisplayManager:redraw()
-    if not self.dirty or norns.menu.status() then return end
+    if not self.dirty then return end
 
     self.screen.clear()
     self.screen.font_face(1)
