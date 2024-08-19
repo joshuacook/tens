@@ -30,7 +30,7 @@ function DisplayManager:updateBPM(bpm)
 end
 
 function DisplayManager:updateCurrentSequence(sequence)
-    self.currentSequence = sequence
+    self.currentSequence = sequence or "None"
     self.dirty = true
     self:redraw()
 end
@@ -43,6 +43,12 @@ end
 
 function DisplayManager:showMetadataPage(show)
     self.isMetadataPage = show
+    self:redraw()
+end
+
+function DisplayManager:togglePlay()
+    self.isPlaying = not self.isPlaying
+    self.dirty = true
     self:redraw()
 end
 
@@ -65,6 +71,7 @@ end
 function DisplayManager:drawMainPage()
     self.screen.move(0, 10)
     self.screen.text("Measure: " .. self.measureCount)
+    self.screen.text(" Playing: " .. (self.isPlaying and "Yes" or "No"))
 
     self.screen.circle(60, 10, 5)
     if self.isPlaying then
@@ -79,7 +86,7 @@ function DisplayManager:drawMainPage()
     self.screen.text("BPM: " .. self.bpm)
 
     self.screen.move(0, 30)
-    self.screen.text("Sequence: " .. self.currentSequence)
+    self.screen.text("Sequence: " .. (self.currentSequence or "None"))
 
     local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 40)

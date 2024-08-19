@@ -21,7 +21,7 @@ function init()
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)
-
+    
     clockManager = ClockManager.new()
     clockManager:init(clock, params, displayManager)
     

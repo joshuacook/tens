@@ -9,9 +9,9 @@ end
 function SequenceManager:init(midiController)
     self.midiController = midiController
     self.currentScene = nil
-    self.sequences = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a"}
-    self.currentSequenceIndex = 1
-    self.currentSequence = self.sequences[self.currentSequenceIndex]
+    self.sequences = nil
+    self.currentSequenceIndex = nil
+    self.currentSequence = nil
 end
 
 function SequenceManager:loadScene(scene)
@@ -37,6 +37,10 @@ function SequenceManager:getCurrentStep(step)
         end
     end
     return result
+end
+
+function SequenceManager:setSequences(sequences)
+    self.sequences = sequences
 end
 
 function SequenceManager:setStep(sequence, drum, step, value)

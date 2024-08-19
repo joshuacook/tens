@@ -40,6 +40,7 @@ function SongManager:loadSong(filename)
     self.sceneCount = #self.currentSong.scenes
 
     self.params:set("clock_tempo", self.currentSong.bpm or 120)
+    self.sequenceManager:setSequences(self.currentSong.drum_parts)
 
     if self.sceneCount > 0 then
         print("Loading first scene:")

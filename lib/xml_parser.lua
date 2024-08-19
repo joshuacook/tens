@@ -1,6 +1,5 @@
 -- lib/xml_parser.lua
 local XMLParser = {}
-local DRUM_PARTS = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a"}
 
 XMLParser.__index = XMLParser
 
@@ -17,14 +16,22 @@ function XMLParser:parse_song(content)
 
     song.title = content:match("<title>%s*(.-)%s*</title>")
     song.bpm = tonumber(content:match("<bpm>(%d+)</bpm>"))
+    local drum_parts_string = content:match("<drum_parts>(.-)</drum_parts>")
+    song.drum_parts = {}
+    for part in drum_parts_string:gmatch("[^,]+") do
+        table.insert(song.drum_parts, part:match("^%s*(.-)%s*$"))
+    end
     print("Song title:", song.title)
     print("Song bpm:", song.bpm)
+    for _, part in ipairs(song.drum_parts) do
+        print("Drum part:", part)
+    end
 
     for scene_chunk in content:gmatch("<scene>(.-)</scene>") do
         local scene = {}
         
         print("Parsing scene")
-        for _, drum_part in ipairs(DRUM_PARTS) do
+        for _, drum_part in ipairs(song.drum_parts) do
             local drum_data = scene_chunk:match("<" .. drum_part .. ">(.-)</" .. drum_part .. ">")
             if drum_data then
                 local steps = {}
@@ -54,7 +61,7 @@ function XMLParser:serialize_song(song)
     
     for _, scene in ipairs(song.scenes) do
         output = output .. "<scene>\n"
-        for _, drum_part in ipairs(DRUM_PARTS) do
+        for _, drum_part in ipairs(song.drum_parts) do
             if scene[drum_part] then
                 output = output .. string.format("  <%s>\n", drum_part)
                 for i = 1, 8 do
