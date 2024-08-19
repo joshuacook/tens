@@ -28,7 +28,7 @@ function init()
     inputHandler = InputHandler.new()
     inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager)
 
-    songManager:loadSong("default_song.xml")
+    songManager:loadSong("001.xml")
 
     redraw_metro = metro.init()
     redraw_metro.time = 1/15

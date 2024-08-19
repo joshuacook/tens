@@ -65,24 +65,25 @@ function SongManager:loadScene(sceneIndex)
     return true
 end
 
-function SongManager:saveSong()
+function SongManager:saveSong(filename)
     if not self.currentSong then
         print("Error: No song to save")
         return false
     end
 
-    local filename = self.currentSong.filename
     local full_path = self.SONGS_DIRECTORY .. filename
     local file, err = io.open(full_path, "w")
     if file then
         file:write(self.xmlParser:serialize_song(self.currentSong))
         file:close()
+        print("Song saved successfully as " .. filename)
         return true
     else
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
 end
+
 
 function SongManager:getCurrentSceneIndex()
     for i, scene in ipairs(self.currentSong.scenes) do
