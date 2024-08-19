@@ -36,17 +36,16 @@ end
 function InputHandler:handleConfirmationModalKey(n, z)
     if z == 1 then
         if n == 2 then
-            -- Cancel
-            self.displayManager:hideConfirmationModal()
-        elseif n == 3 then
-            -- Confirm
             local action = self.displayManager.confirmationModal.action
             self.displayManager:hideConfirmationModal()
             if action == "load" then
                 self.songManager:loadSong(self.displayManager.currentFileName)
+                self:redrawGrid()
             elseif action == "save" then
                 self.songManager:saveSong(self.displayManager.currentFileName)
             end
+        elseif n == 3 then
+            self.displayManager:hideConfirmationModal()
         end
     end
 end
@@ -69,7 +68,6 @@ end
 
 function InputHandler:handleEnc(n, d)
     if n == 1 then
-        -- Use E1 to cycle through pages
         if d > 0 then
             self.displayManager:nextPage()
         else
@@ -100,7 +98,7 @@ function InputHandler:handleEnc(n, d)
 end
 
 function InputHandler:handleGridPress(x, y, z)
-    if z == 1 then  -- button pressed
+    if z == 1 then
         local currentSequence = self.sequenceManager.currentSequence
         local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()
         local index = (y - 1) * 16 + x
@@ -124,7 +122,7 @@ function InputHandler:redrawGrid()
         print("Grid not initialized")
         return
     end
-    my_grid:all(0)  -- Clear the grid
+    my_grid:all(0)
     
     local currentSequence = self.sequenceManager.currentSequence
     local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()

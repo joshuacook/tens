@@ -57,8 +57,18 @@ function XMLParser:parse_song(content)
 end
 
 function XMLParser:serialize_song(song)
-    local output = string.format('<title>%s</title>\n<bpm>%d</bpm>\n<scenes>\n', song.title, song.bpm)
-    
+    local output = string.format('<title>%s</title>\n<bpm>%d</bpm>\n', song.title, song.bpm)
+
+    output = output .. "<drum_parts>"
+    for i, part in ipairs(song.drum_parts) do
+        output = output .. part
+        if i < #song.drum_parts then
+            output = output .. ","
+        end
+    end
+    output = output .. "</drum_parts>\n"
+
+    output = output .. "<scenes>\n"
     for _, scene in ipairs(song.scenes) do
         output = output .. "<scene>\n"
         for _, drum_part in ipairs(song.drum_parts) do

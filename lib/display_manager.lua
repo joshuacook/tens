@@ -99,6 +99,7 @@ function DisplayManager:redraw()
 end
 
 function DisplayManager:drawLoadSavePage()
+    self.screen.level(15)
     self.screen.move(0, 10)
     self.screen.text("Load/Save Page")
     
@@ -114,7 +115,7 @@ end
 
 function DisplayManager:drawConfirmationModal()
     self.screen.level(15)
-    self.screen.rect(10, 20, 108, 24)
+    self.screen.rect(10, 20, 108, 30)
     self.screen.fill()
     
     self.screen.level(0)
@@ -122,7 +123,7 @@ function DisplayManager:drawConfirmationModal()
     self.screen.text(self.confirmationModal.message)
     
     self.screen.move(15, 45)
-    self.screen.text("K2: Cancel  K3: Confirm")
+    self.screen.text("K2: Confirm  K3: Cancel")
 end
 
 function DisplayManager:hideConfirmationModal()
@@ -149,6 +150,7 @@ end
 
 
 function DisplayManager:drawMainPage()
+    self.screen.level(15)
     self.screen.move(0, 10)
     self.screen.text("Measure: " .. self.measureCount)
     self.screen.text(" Playing: " .. (self.isPlaying and "Yes" or "No"))
@@ -176,6 +178,7 @@ function DisplayManager:drawMainPage()
 end
 
 function DisplayManager:drawMetadataPage()
+    self.screen.level(15)
     self.screen.move(0, 10)
     self.screen.text("Metadata Page")
     
@@ -193,6 +196,7 @@ function DisplayManager:drawMetadataPage()
 end
 
 function DisplayManager:drawSequencePage()
+    self.screen.level(15)
     self.screen.move(0, 10)
     self.screen.text("Sequence Page")
     

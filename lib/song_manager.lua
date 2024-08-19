@@ -18,9 +18,11 @@ function SongManager:init(params, sequenceManager)
 end
 
 function SongManager:loadSong(filename)
+    print("Loading song: " .. filename)
     local full_path = self.SONGS_DIRECTORY .. filename
     local file, err = io.open(full_path, "r")
 
+    print("Full path: " .. full_path)
     if not file then
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
@@ -28,7 +30,6 @@ function SongManager:loadSong(filename)
 
     local content = file:read("*a")
     file:close()
-    
     local song = self.xmlParser:parse_song(content)
     if not song then
         print("Error: Failed to parse song")
@@ -69,6 +70,10 @@ function SongManager:saveSong(filename)
     if not self.currentSong then
         print("Error: No song to save")
         return false
+    end
+
+    if not self.currentSong.drum_parts then
+        self.currentSong.drum_parts = self.sequenceManager:getSequences()
     end
 
     local full_path = self.SONGS_DIRECTORY .. filename

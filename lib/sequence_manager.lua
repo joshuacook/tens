@@ -39,6 +39,10 @@ function SequenceManager:getCurrentStep(step)
     return result
 end
 
+function SequenceManager:getSequences()
+    return self.sequences
+end
+
 function SequenceManager:setSequences(sequences)
     self.sequences = sequences
 end
