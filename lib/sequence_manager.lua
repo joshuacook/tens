@@ -9,7 +9,7 @@ end
 function SequenceManager:init(midiController)
     self.midiController = midiController
     self.currentScene = nil
-    self.sequences = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a", "drum3b"}
+    self.sequences = {"drum1a", "drum1b", "drum2a", "drum2b"}
     self.currentSequenceIndex = 1
     self.currentSequence = self.sequences[self.currentSequenceIndex]
 end

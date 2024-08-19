@@ -14,8 +14,7 @@ function init()
     clockManager:init(clock, params)
     
     midiController = MIDIController.new()
-    midiController:init(midi)
-    midiController:connect()
+    midiController:init()
     
     sequenceManager = SequenceManager.new()
     sequenceManager:init(midiController)
@@ -45,7 +44,7 @@ function init()
     
             local stepData = sequenceManager:getCurrentStep(stepInMeasure)
             for seq, drums in pairs(stepData) do
-                local deviceIndex = math.ceil(tonumber(seq:sub(5, 5)) / 2)
+                local drumMachineIndex = tonumber(seq:sub(5, 5))
                 local isSequenceB = seq:sub(-1) == "b"
                 for drumIndex, value in ipairs(drums) do
                     if isSequenceB then
@@ -53,7 +52,7 @@ function init()
                     end
                     if value > 0 then
                         local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 3
-                        midiController:sendNote(deviceIndex, drumIndex, velocity)
+                        midiController:sendNote(drumMachineIndex, drumIndex, velocity)
                     end
                 end
             end
@@ -74,7 +73,7 @@ function init()
         
         bpm = function(newBpm)
             displayManager:updateBPM()
-            midiController:updateTempo(newBpm) -- If your MIDI controller needs to know about tempo changes
+            midiController:updateTempo(newBpm)
         end
     })
 

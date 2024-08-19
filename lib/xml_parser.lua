@@ -1,6 +1,6 @@
 -- lib/xml_parser.lua
 local XMLParser = {}
-local DRUM_PARTS = {"drum1a", "drum1b", "drum2a", "drum2b", "drum3a", "drum3b"}
+local DRUM_PARTS = {"drum1a", "drum1b", "drum2a", "drum2b"}
 
 XMLParser.__index = XMLParser
 

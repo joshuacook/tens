@@ -38,7 +38,19 @@ classDiagram
         +init(midi)
         -DRUM_NOTE_MAP: int[]
         +sendNote(channel: int, note: int, velocity: int)
-        +channels: int[3]  // MIDI channels for each drum device
+        +devices: MIDIDevice[]
+        +drumMachines: DrumMachine[]
+    }
+    class MIDIDevice {
+        +name: string
+        +connect()
+        +sendNote(note: int, velocity: int, channel: int)
+        +sendAllNotesOff(channel: int)
+    }
+    class DrumMachine {
+        +channel: int
+        +noteMap: int[]
+        +sendNote(sampleIndex: int, velocity: int)
     }
     class Sequence {
         +steps: int[3][2][16][8]  // [device][page][step][sample]
@@ -104,4 +116,7 @@ classDiagram
     SongManager --> DisplayManager : updates
     SequenceManager --> XMLParser : uses
     SongManager --> XMLParser : uses
+    MIDIController --> MIDIDevice : manages
+    MIDIController --> DrumMachine : manages
+    MIDIDevice --> DrumMachine : connects to
 ```

@@ -1,0 +1,38 @@
+## Roland 808 drum note mapping
+
+### Drum Machine 1a
+
+| Note | Sound | Pad | Level |
+| ---- | ----- | --- | ----- |
+| 36   | Kick  | 9   | 69    |
+| 38   | Snare | 10  | 127   |
+| 42   | Cl HH | 3   | 127   |
+| 46   | Op HH | 4   | 127   |
+| 41   | LTom  | 11  | 48    |
+| 45   | MTom  | 12  | 48    |
+| 48   | HTom  | 13  | 48    |
+| 49   | Cymbl | 5   | 127   |
+
+### Drum Machine 1b
+
+| Note | Sound | Pad | Level |
+| ---- | ----- | --- | ----- |
+| 62   | HCong | 14  | 60    |
+| 63   | MCong | 15  | 87    |
+| 64   | LCong | 16  | 64    |
+| 37   | Rim   | 1   | 77    |
+| 39   | Clap  | 2   | 97    |
+| 51   | Clave | 6   | 127   |
+| 54   | Mrcas | 7   | 117   |
+| 56   | Cbell | 8   | 127   |
+
+## Roland T-8 drum note mapping
+
+| Note | Sound |
+| ---- | ----- |
+| 36   | Kick  |
+| 38   | Snare |
+| 42   | Cl HH |
+| 46   | Op HH |
+| 41   | Clap  |
+| 45   | Tom   |
