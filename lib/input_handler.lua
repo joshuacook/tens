@@ -90,8 +90,7 @@ function InputHandler:handleEnc(n, d)
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
             local newBPM = util.clamp(self.params:get("clock_tempo") + d, 20, 300)
             self.params:set("clock_tempo", newBPM)
-            self.displayManager:markDirty()
-            self.displayManager:redraw()
+            self.displayManager:updateBPM(newBPM)
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
             if d > 0 then
                 self.sequenceManager:nextSequence()

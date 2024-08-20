@@ -17,7 +17,6 @@ function ClockManager:init(clock, params, displayManager)
     self.isPlaying = false
 
     self.clock.tempo_change_handler = function(bpm)
-        self:notifyListeners("bpm", bpm)
         self.displayManager:updateBPM(bpm)
     end
 

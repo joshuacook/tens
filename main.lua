@@ -63,11 +63,6 @@ function init()
                 -- This executes every 4 measures
                 -- Add your logic here
             end
-        end,
-        
-        bpm = function(newBpm)
-            displayManager:updateBPM()
-            midiController:updateTempo(newBpm)
         end
     })
 
