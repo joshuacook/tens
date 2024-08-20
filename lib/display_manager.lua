@@ -37,6 +37,7 @@ function DisplayManager:previousPage()
 end
 
 function DisplayManager:updateMeasureCount(count)
+    self.dirty = true
     self.measureCount = count
     self:redraw()
 end
@@ -70,7 +71,7 @@ function DisplayManager:togglePlay()
 end
 
 function DisplayManager:redraw()
-    if not self.dirty then return end
+    if not self.dirty or norns.menu.status() then return end
 
     self.screen.clear()
     self.screen.font_face(1)
@@ -132,6 +133,10 @@ function DisplayManager:hideConfirmationModal()
     self:redraw()
 end
 
+function DisplayManager:markDirty()
+    self.dirty = true
+end
+
 function DisplayManager:updateFileName(delta)
     local num = tonumber(self.currentFileName:match("(%d+)"))
     num = (num + delta - 1) % 999 + 1
@@ -148,7 +153,6 @@ function DisplayManager:showConfirmationModal(action, message)
     self:redraw()
 end
 
-
 function DisplayManager:drawMainPage()
     self.screen.level(15)
     self.screen.move(0, 10)
@@ -161,20 +165,20 @@ function DisplayManager:drawMainPage()
         self.screen.circle(60, 10, 3)
         self.screen.circle(60, 10, 2)
         self.screen.circle(60, 10, 1)
-
     end
 
     self.screen.move(0, 20)
     self.screen.text("BPM: " .. self.bpm)
 
+    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 30)
+    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
+
+    self.screen.move(0, 40)
     self.screen.text("Sequence: " .. (self.currentSequence or "None"))
 
-    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
-    self.screen.move(0, 40)
-    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
     self.screen.move(0, 50)
-    self.screen.text("E2: scene // E3: sequence")
+    self.screen.text("E2: scene // E3: BPM")
 end
 
 function DisplayManager:drawMetadataPage()
@@ -200,9 +204,15 @@ function DisplayManager:drawSequencePage()
     self.screen.move(0, 10)
     self.screen.text("Sequence Page")
     
+    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
+    self.screen.move(0, 20)
+    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
+    
     self.screen.move(0, 30)
     self.screen.text("Current Sequence: " .. (self.currentSequence or "None"))
     
+    self.screen.move(0, 50)
+    self.screen.text("E2: scene // E3: sequence")
 end
 
 return DisplayManager

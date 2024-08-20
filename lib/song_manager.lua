@@ -89,8 +89,10 @@ function SongManager:saveSong(filename)
     end
 end
 
-
 function SongManager:getCurrentSceneIndex()
+    if not self.currentSong then
+        return nil
+    end
     for i, scene in ipairs(self.currentSong.scenes) do
         if scene == self.sequenceManager.currentScene then
             return i

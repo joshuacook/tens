@@ -52,7 +52,9 @@ end
 
 function InputHandler:handleRegularKey(n, z)
     if z == 1 then
-        if n == 2 then
+        if n==1 then 
+            self.displayManager:markDirty()
+        elseif n == 2 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("load", "Load " .. self.displayManager.currentFileName .. "?")
             else
@@ -87,13 +89,20 @@ function InputHandler:handleEnc(n, d)
             end
         end
     elseif n == 3 then
-        if d > 0 then
-            self.sequenceManager:nextSequence()
-        else
-            self.sequenceManager:previousSequence()
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+            local newBPM = util.clamp(self.params:get("clock_tempo") + d, 20, 300)
+            self.params:set("clock_tempo", newBPM)
+            self.displayManager:markDirty()
+            self.displayManager:redraw()
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
+            if d > 0 then
+                self.sequenceManager:nextSequence()
+            else
+                self.sequenceManager:previousSequence()
+            end
+            self.displayManager:updateCurrentSequence(self.sequenceManager.currentSequence)
+            self:redrawGrid()
         end
-        self.displayManager:updateCurrentSequence(self.sequenceManager.currentSequence)
-        self:redrawGrid()
     end
 end
 
