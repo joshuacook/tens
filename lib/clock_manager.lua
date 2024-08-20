@@ -24,6 +24,46 @@ function ClockManager:init(clock, params, displayManager)
     end)
 end
 
+function ClockManager:addListener(listener)
+    table.insert(self.listeners, listener)
+end
+
+function ClockManager:clockLoop()
+    while self.isPlaying do
+        self:tick()
+        self.clock.sync(1/4)
+    end
+end
+
+function ClockManager:getCurrentBPM()
+    return self.params:get("clock_tempo")
+end
+
+function ClockManager:getCurrentPosition()
+    return self.currentMeasure, self.currentBeat, self.currentStep
+end
+
+function ClockManager:notifyListeners(event, data)
+    for _, listener in ipairs(self.listeners) do
+        if listener[event] then
+            listener[event](data)
+        end
+    end
+end
+
+function ClockManager:onBPMChange(bpm)
+    self:notifyListeners("bpm", bpm)
+end
+
+function ClockManager:removeListener(listener)
+    for i, l in ipairs(self.listeners) do
+        if l == listener then
+            table.remove(self.listeners, i)
+            break
+        end
+    end
+end
+
 function ClockManager:start()
     if not self.isPlaying then
         self.isPlaying = true
@@ -44,13 +84,6 @@ function ClockManager:stop()
     end
 end
 
-function ClockManager:clockLoop()
-    while self.isPlaying do
-        self:tick()
-        self.clock.sync(1/4)
-    end
-end
-
 function ClockManager:tick()
     self:notifyListeners("tick")
     
@@ -64,39 +97,6 @@ function ClockManager:tick()
             self:notifyListeners("measure")
         end
         self:notifyListeners("beat")
-    end
-end
-
-function ClockManager:onBPMChange(bpm)
-    self:notifyListeners("bpm", bpm)
-end
-
-function ClockManager:getCurrentPosition()
-    return self.currentMeasure, self.currentBeat, self.currentStep
-end
-
-function ClockManager:getCurrentBPM()
-    return self.params:get("clock_tempo")
-end
-
-function ClockManager:addListener(listener)
-    table.insert(self.listeners, listener)
-end
-
-function ClockManager:removeListener(listener)
-    for i, l in ipairs(self.listeners) do
-        if l == listener then
-            table.remove(self.listeners, i)
-            break
-        end
-    end
-end
-
-function ClockManager:notifyListeners(event, data)
-    for _, listener in ipairs(self.listeners) do
-        if listener[event] then
-            listener[event](data)
-        end
     end
 end
 
