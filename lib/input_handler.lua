@@ -76,7 +76,7 @@ function InputHandler:handleEnc(n, d)
     elseif n == 2 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
             self.displayManager:updateFileName(d)
-        else
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] ~= "metadata" then
             local sceneCount = self.songManager.sceneCount
             if sceneCount > 0 then
                 local currentScene = self.songManager:getCurrentSceneIndex()
@@ -117,12 +117,6 @@ function InputHandler:handleGridPress(x, y, z)
     end
 end
 
-function InputHandler:updateGridLED(x, y, volume)
-    local brightness = volume * 4  -- Scale 0-3 to 0-15
-    my_grid:led(x, y, brightness)
-    my_grid:refresh()
-end
-
 function InputHandler:redrawGrid()
     if not my_grid then
         print("Grid not initialized")
@@ -140,6 +134,12 @@ function InputHandler:redrawGrid()
         end
     end
     
+    my_grid:refresh()
+end
+
+function InputHandler:updateGridLED(x, y, volume)
+    local brightness = volume * 4  -- Scale 0-3 to 0-15
+    my_grid:led(x, y, brightness)
     my_grid:refresh()
 end
 

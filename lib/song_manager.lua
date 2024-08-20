@@ -17,6 +17,29 @@ function SongManager:init(params, sequenceManager)
     self.sceneCount = 0
 end
 
+function SongManager:getCurrentSceneIndex()
+    if not self.currentSong then
+        return nil
+    end
+    for i, scene in ipairs(self.currentSong.scenes) do
+        if scene == self.sequenceManager.currentScene then
+            return i
+        end
+    end
+    return nil
+end
+
+function SongManager:loadScene(sceneIndex)
+    if not self.currentSong or not self.currentSong.scenes[sceneIndex] then
+        print("Error: Invalid scene index")
+        return false
+    end
+
+    local scene = self.currentSong.scenes[sceneIndex]
+    self.sequenceManager:loadScene(scene)
+    return true
+end
+
 function SongManager:loadSong(filename)
     print("Loading song: " .. filename)
     local full_path = self.SONGS_DIRECTORY .. filename
@@ -55,15 +78,20 @@ function SongManager:loadSong(filename)
     return true
 end
 
-function SongManager:loadScene(sceneIndex)
-    if not self.currentSong or not self.currentSong.scenes[sceneIndex] then
-        print("Error: Invalid scene index")
-        return false
+function SongManager:nextScene()
+    local currentIndex = self:getCurrentSceneIndex()
+    if currentIndex and currentIndex < #self.currentSong.scenes then
+        return self:loadScene(currentIndex + 1)
     end
+    return false
+end
 
-    local scene = self.currentSong.scenes[sceneIndex]
-    self.sequenceManager:loadScene(scene)
-    return true
+function SongManager:previousScene()
+    local currentIndex = self:getCurrentSceneIndex()
+    if currentIndex and currentIndex > 1 then
+        return self:loadScene(currentIndex - 1)
+    end
+    return false
 end
 
 function SongManager:saveSong(filename)
@@ -87,34 +115,6 @@ function SongManager:saveSong(filename)
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
-end
-
-function SongManager:getCurrentSceneIndex()
-    if not self.currentSong then
-        return nil
-    end
-    for i, scene in ipairs(self.currentSong.scenes) do
-        if scene == self.sequenceManager.currentScene then
-            return i
-        end
-    end
-    return nil
-end
-
-function SongManager:nextScene()
-    local currentIndex = self:getCurrentSceneIndex()
-    if currentIndex and currentIndex < #self.currentSong.scenes then
-        return self:loadScene(currentIndex + 1)
-    end
-    return false
-end
-
-function SongManager:previousScene()
-    local currentIndex = self:getCurrentSceneIndex()
-    if currentIndex and currentIndex > 1 then
-        return self:loadScene(currentIndex - 1)
-    end
-    return false
 end
 
 return SongManager

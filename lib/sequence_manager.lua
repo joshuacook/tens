@@ -14,12 +14,6 @@ function SequenceManager:init(midiController)
     self.currentSequence = nil
 end
 
-function SequenceManager:loadScene(scene)
-    self.currentScene = scene
-    self.currentSequenceIndex = 1
-    self.currentSequence = self.sequences[self.currentSequenceIndex]
-end
-
 function SequenceManager:getCurrentSequenceSteps()
     return self.currentScene[self.currentSequence]
 end
@@ -43,16 +37,10 @@ function SequenceManager:getSequences()
     return self.sequences
 end
 
-function SequenceManager:setSequences(sequences)
-    self.sequences = sequences
-end
-
-function SequenceManager:setStep(sequence, drum, step, value)
-    local sequenceSteps = self.currentScene[sequence]
-    if sequenceSteps then
-        local index = (drum - 1) * 16 + step
-        sequenceSteps[index] = value
-    end
+function SequenceManager:loadScene(scene)
+    self.currentScene = scene
+    self.currentSequenceIndex = 1
+    self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
 
 function SequenceManager:nextSequence()
@@ -63,6 +51,18 @@ end
 function SequenceManager:previousSequence()
     self.currentSequenceIndex = ((self.currentSequenceIndex - 2 + #self.sequences) % #self.sequences) + 1
     self.currentSequence = self.sequences[self.currentSequenceIndex]
+end
+
+function SequenceManager:setSequences(sequences)
+    self.sequences = sequences
+end
+
+function SequenceManager:setStep(sequence, drum, step, value)
+    local sequenceSteps = self.currentScene[sequence]
+    if sequenceSteps then
+        local index = (drum - 1) * 16 + step
+        sequenceSteps[index] = value
+    end
 end
 
 return SequenceManager

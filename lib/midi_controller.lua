@@ -25,6 +25,16 @@ function MIDIDevice:connect()
     end
 end
 
+function MIDIDevice:sendAllNotesOff(channel)
+    if self.connection then
+        for note = 0, 127 do
+            self.connection:note_off(note, 0, channel)
+        end
+    else
+        print("Error: MIDI device not connected")
+    end
+end
+
 function MIDIDevice:sendNote(note, velocity, channel)
     if self.connection then
         self.connection:note_on(note, velocity, channel)
@@ -33,16 +43,6 @@ function MIDIDevice:sendNote(note, velocity, channel)
             clock.sleep(0.1)
             self.connection:note_off(note, 0, channel)
         end)
-    else
-        print("Error: MIDI device not connected")
-    end
-end
-
-function MIDIDevice:sendAllNotesOff(channel)
-    if self.connection then
-        for note = 0, 127 do
-            self.connection:note_off(note, 0, channel)
-        end
     else
         print("Error: MIDI device not connected")
     end
@@ -94,19 +94,19 @@ function MIDIController:init()
     self.drumMachines[3] = DrumMachine.new(self.devices[2], 10, T8_NOTE_MAP)    -- T-8 drum machine
 end
 
-function MIDIController:sendNote(drumMachineIndex, sampleIndex, velocity)
+function MIDIController:sendAllNotesOff(drumMachineIndex)
     local drumMachine = self.drumMachines[drumMachineIndex]
     if drumMachine then
-        drumMachine:sendNote(sampleIndex, velocity)
+        drumMachine.device:sendAllNotesOff(drumMachine.channel)
     else
         print("Error: Invalid drum machine index")
     end
 end
 
-function MIDIController:sendAllNotesOff(drumMachineIndex)
+function MIDIController:sendNote(drumMachineIndex, sampleIndex, velocity)
     local drumMachine = self.drumMachines[drumMachineIndex]
     if drumMachine then
-        drumMachine.device:sendAllNotesOff(drumMachine.channel)
+        drumMachine:sendNote(sampleIndex, velocity)
     else
         print("Error: Invalid drum machine index")
     end

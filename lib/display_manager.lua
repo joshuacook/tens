@@ -23,70 +23,17 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.confirmationModal = {active = false, action = nil, message = ""}
 end
 
-function DisplayManager:nextPage()
-    self.currentPageIndex = (self.currentPageIndex % #self.pages) + 1
-    self:redraw()
-end
-
-function DisplayManager:previousPage()
-    self.currentPageIndex = ((self.currentPageIndex - 2) % #self.pages) + 1
-    self:redraw()
-end
-
-function DisplayManager:updateMeasureCount(count)
-    self.measureCount = count
-end
-
-function DisplayManager:updateBPM(bpm)
-    self.bpm = self.params:get("clock_tempo")
-    self:redraw()
-end
-
-function DisplayManager:updateCurrentSequence(sequence)
-    self.currentSequence = sequence or "None"
-    self:redraw()
-end
-
-function DisplayManager:updateCurrentScene(scene)
-    self.currentScene = scene
-    self:redraw()
-end
-
-function DisplayManager:showMetadataPage(show)
-    self.isMetadataPage = show
-    self:redraw()
-end
-
-function DisplayManager:togglePlay()
-    self.isPlaying = not self.isPlaying
-    self:redraw()
-end
-
-function DisplayManager:redraw()
-    print("redraw")
-    self.screen.clear()
-    self.screen.font_face(1)
-    self.screen.font_size(8)
-
-    local currentPage = self.pages[self.currentPageIndex]
-    if currentPage == "main" then
-        self:drawMainPage()
-    elseif currentPage == "metadata" then
-        self:drawMetadataPage()
-    elseif currentPage == "sequence" then
-        self:drawSequencePage()
-    elseif currentPage == "load_save" then
-        self:drawLoadSavePage()
-    end
-
-    if self.confirmationModal.active then
-        self:drawConfirmationModal()
-    end
-
-    self.screen.move(0, 60)
-    self.screen.text("Page: " .. currentPage .. " (" .. self.currentPageIndex .. "/" .. #self.pages .. ")")
+function DisplayManager:drawConfirmationModal()
+    self.screen.level(15)
+    self.screen.rect(10, 20, 108, 30)
+    self.screen.fill()
     
-    self.screen.update()
+    self.screen.level(0)
+    self.screen.move(15, 35)
+    self.screen.text(self.confirmationModal.message)
+    
+    self.screen.move(15, 45)
+    self.screen.text("K2: Confirm  K3: Cancel")
 end
 
 function DisplayManager:drawLoadSavePage()
@@ -102,38 +49,6 @@ function DisplayManager:drawLoadSavePage()
     
     self.screen.move(0, 50)
     self.screen.text("E2: Change filename")
-end
-
-function DisplayManager:drawConfirmationModal()
-    self.screen.level(15)
-    self.screen.rect(10, 20, 108, 30)
-    self.screen.fill()
-    
-    self.screen.level(0)
-    self.screen.move(15, 35)
-    self.screen.text(self.confirmationModal.message)
-    
-    self.screen.move(15, 45)
-    self.screen.text("K2: Confirm  K3: Cancel")
-end
-
-function DisplayManager:hideConfirmationModal()
-    self.confirmationModal.active = false
-    self:redraw()
-end
-
-function DisplayManager:updateFileName(delta)
-    local num = tonumber(self.currentFileName:match("(%d+)"))
-    num = (num + delta - 1) % 999 + 1
-    self.currentFileName = string.format("%03d.xml", num)
-    self:redraw()
-end
-
-function DisplayManager:showConfirmationModal(action, message)
-    self.confirmationModal.active = true
-    self.confirmationModal.action = action
-    self.confirmationModal.message = message
-    self:redraw()
 end
 
 function DisplayManager:drawMainPage()
@@ -195,6 +110,86 @@ function DisplayManager:drawSequencePage()
     
     self.screen.move(0, 50)
     self.screen.text("E2: scene // E3: sequence")
+end
+
+function DisplayManager:hideConfirmationModal()
+    self.confirmationModal.active = false
+    self:redraw()
+end
+
+function DisplayManager:nextPage()
+    self.currentPageIndex = (self.currentPageIndex % #self.pages) + 1
+    self:redraw()
+end
+
+function DisplayManager:previousPage()
+    self.currentPageIndex = ((self.currentPageIndex - 2) % #self.pages) + 1
+    self:redraw()
+end
+
+function DisplayManager:showConfirmationModal(action, message)
+    self.confirmationModal.active = true
+    self.confirmationModal.action = action
+    self.confirmationModal.message = message
+    self:redraw()
+end
+
+function DisplayManager:redraw()
+    print("redraw")
+    self.screen.clear()
+    self.screen.font_face(1)
+    self.screen.font_size(8)
+
+    local currentPage = self.pages[self.currentPageIndex]
+    if currentPage == "main" then
+        self:drawMainPage()
+    elseif currentPage == "metadata" then
+        self:drawMetadataPage()
+    elseif currentPage == "sequence" then
+        self:drawSequencePage()
+    elseif currentPage == "load_save" then
+        self:drawLoadSavePage()
+    end
+
+    if self.confirmationModal.active then
+        self:drawConfirmationModal()
+    end
+
+    self.screen.move(0, 60)
+    self.screen.text("Page: " .. currentPage .. " (" .. self.currentPageIndex .. "/" .. #self.pages .. ")")
+    
+    self.screen.update()
+end
+
+function DisplayManager:togglePlay()
+    self.isPlaying = not self.isPlaying
+    self:redraw()
+end
+
+function DisplayManager:updateBPM(bpm)
+    self.bpm = self.params:get("clock_tempo")
+    self:redraw()
+end
+
+function DisplayManager:updateCurrentSequence(sequence)
+    self.currentSequence = sequence or "None"
+    self:redraw()
+end
+
+function DisplayManager:updateCurrentScene(scene)
+    self.currentScene = scene
+    self:redraw()
+end
+
+function DisplayManager:updateFileName(delta)
+    local num = tonumber(self.currentFileName:match("(%d+)"))
+    num = (num + delta - 1) % 999 + 1
+    self.currentFileName = string.format("%03d.xml", num)
+    self:redraw()
+end
+
+function DisplayManager:updateMeasureCount(count)
+    self.measureCount = count
 end
 
 return DisplayManager
