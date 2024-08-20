@@ -14,7 +14,6 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.params = params
     self.bpm = self.params:get("clock_tempo")
     self.measureCount = 1
-    self.dirty = true
     self.isPlaying = false
 
     self.pages = {"main", "metadata", "sequence", "load_save"}
@@ -26,20 +25,16 @@ end
 
 function DisplayManager:nextPage()
     self.currentPageIndex = (self.currentPageIndex % #self.pages) + 1
-    self.dirty = true
     self:redraw()
 end
 
 function DisplayManager:previousPage()
     self.currentPageIndex = ((self.currentPageIndex - 2) % #self.pages) + 1
-    self.dirty = true
     self:redraw()
 end
 
 function DisplayManager:updateMeasureCount(count)
-    self.dirty = true
     self.measureCount = count
-    self:redraw()
 end
 
 function DisplayManager:updateBPM(bpm)
@@ -49,13 +44,11 @@ end
 
 function DisplayManager:updateCurrentSequence(sequence)
     self.currentSequence = sequence or "None"
-    self.dirty = true
     self:redraw()
 end
 
 function DisplayManager:updateCurrentScene(scene)
     self.currentScene = scene
-    self.dirty = true
     self:redraw()
 end
 
@@ -66,13 +59,11 @@ end
 
 function DisplayManager:togglePlay()
     self.isPlaying = not self.isPlaying
-    self.dirty = true
     self:redraw()
 end
 
 function DisplayManager:redraw()
-    if not self.dirty or norns.menu.status() then return end
-
+    print("redraw")
     self.screen.clear()
     self.screen.font_face(1)
     self.screen.font_size(8)
@@ -96,7 +87,6 @@ function DisplayManager:redraw()
     self.screen.text("Page: " .. currentPage .. " (" .. self.currentPageIndex .. "/" .. #self.pages .. ")")
     
     self.screen.update()
-    self.dirty = false
 end
 
 function DisplayManager:drawLoadSavePage()
@@ -129,19 +119,13 @@ end
 
 function DisplayManager:hideConfirmationModal()
     self.confirmationModal.active = false
-    self.dirty = true
     self:redraw()
-end
-
-function DisplayManager:markDirty()
-    self.dirty = true
 end
 
 function DisplayManager:updateFileName(delta)
     local num = tonumber(self.currentFileName:match("(%d+)"))
     num = (num + delta - 1) % 999 + 1
     self.currentFileName = string.format("%03d.xml", num)
-    self.dirty = true
     self:redraw()
 end
 
@@ -149,15 +133,13 @@ function DisplayManager:showConfirmationModal(action, message)
     self.confirmationModal.active = true
     self.confirmationModal.action = action
     self.confirmationModal.message = message
-    self.dirty = true
     self:redraw()
 end
 
 function DisplayManager:drawMainPage()
     self.screen.level(15)
     self.screen.move(0, 10)
-    self.screen.text("Measure: " .. self.measureCount)
-    self.screen.text(" Playing: " .. (self.isPlaying and "Yes" or "No"))
+    self.screen.text("Playing: " .. (self.isPlaying and "Yes" or "No"))
 
     self.screen.circle(60, 10, 5)
     if self.isPlaying then

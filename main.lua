@@ -18,6 +18,7 @@ function init()
     
     songManager = SongManager.new()
     songManager:init(params, sequenceManager)
+    songManager:loadSong("001.xml")
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)
@@ -28,13 +29,6 @@ function init()
     inputHandler = InputHandler.new()
     inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager)
 
-    songManager:loadSong("001.xml")
-
-    redraw_metro = metro.init()
-    redraw_metro.time = 1/15
-    redraw_metro.event = function() displayManager:redraw() end
-    redraw_metro:start()
-    
     clockManager:addListener({
         tick = function()
             local measure, beat, sixteenthNote = clockManager:getCurrentPosition()

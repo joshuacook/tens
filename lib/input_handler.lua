@@ -52,9 +52,7 @@ end
 
 function InputHandler:handleRegularKey(n, z)
     if z == 1 then
-        if n==1 then 
-            self.displayManager:markDirty()
-        elseif n == 2 then
+        if n == 2 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("load", "Load " .. self.displayManager.currentFileName .. "?")
             else
