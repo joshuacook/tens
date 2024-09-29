@@ -11,6 +11,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.sequenceManager = sequenceManager
     self.songManager = songManager
     self.currentSequenceIndex = 1
+    self.currentSequence = self.sequenceManager.sequences[self.currentSequenceIndex]
     self.params = params
     self.bpm = self.params:get("clock_tempo")
     self.measureCount = 1
@@ -195,7 +196,7 @@ end
 
 function DisplayManager:updateEditingScene(scene)
     self:redraw()
-    self:updateCurrentSequenceIndex(1)
+    self:updateCurrentSequenceIndex(self.currentSequenceIndex)
 end
 
 function DisplayManager:updateEditingSequence(sequence)

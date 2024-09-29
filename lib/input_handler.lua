@@ -151,7 +151,7 @@ function InputHandler:redrawGrid()
     
     local editingSceneIndex = self.songManager:getEditingSceneIndex()
     local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
-    local currentSequence = self.sequenceManager.currentSequence
+    local currentSequence = self.displayManager.currentSequence
     local currentSequenceSteps = editingScene[currentSequence]
     
     for y = 1, 8 do
