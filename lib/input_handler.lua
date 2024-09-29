@@ -25,6 +25,19 @@ function InputHandler:init(params, clockManager, displayManager, sequenceManager
     end
 end
 
+function InputHandler:addNewScene()
+    local newScene = self.songManager:addNewScene()
+    if newScene then
+        local newSceneIndex = #self.songManager.currentSong.scenes
+        self.songManager:loadScene(newSceneIndex)
+        self.displayManager:updateCurrentScene(newSceneIndex)
+        self:redrawGrid()
+        print("New scene added and loaded")
+    else
+        print("Failed to add new scene")
+    end
+end
+
 function InputHandler:handleKey(n, z)
     if self.displayManager.confirmationModal.active then
         self:handleConfirmationModalKey(n, z)
@@ -61,6 +74,8 @@ function InputHandler:handleRegularKey(n, z)
         elseif n == 3 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("save", "Save to " .. self.displayManager.currentFileName .. "?")
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
+                self:addNewScene()
             end
         end
     end
@@ -76,13 +91,21 @@ function InputHandler:handleEnc(n, d)
     elseif n == 2 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
             self.displayManager:updateFileName(d)
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] ~= "metadata" then
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
             local sceneCount = self.songManager.sceneCount
             if sceneCount > 0 then
                 local currentScene = self.songManager:getCurrentSceneIndex()
                 local newScene = (currentScene - 1 + d) % sceneCount + 1
                 self.songManager:loadScene(newScene)
                 self.displayManager:updateCurrentScene(newScene)
+            end
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
+            local sceneCount = self.songManager.sceneCount
+            if sceneCount > 0 then
+                local currentEditingScene = self.songManager:getEditingSceneIndex()
+                local newEditingScene = (currentEditingScene - 1 + d) % sceneCount + 1
+                self.songManager:setEditingSceneIndex(newEditingScene)
+                self.displayManager:updateEditingScene(newEditingScene)
                 self:redrawGrid()
             end
         end
@@ -105,12 +128,13 @@ end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
+        local editingSceneIndex = self.songManager:getEditingSceneIndex()
+        local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
         local currentSequence = self.sequenceManager.currentSequence
-        local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()
         local index = (y - 1) * 16 + x
-        local currentValue = currentSequenceSteps[index] or 0
+        local currentValue = editingScene[currentSequence][index] or 0
         local newValue = (currentValue + 1) % 4  -- cycle through 0-3
-        self.sequenceManager:setStep(currentSequence, y, x, newValue)
+        editingScene[currentSequence][index] = newValue
 
         self:updateGridLED(x, y, newValue)
         self.displayManager.dirty = true
@@ -124,8 +148,11 @@ function InputHandler:redrawGrid()
     end
     my_grid:all(0)
     
+    local editingSceneIndex = self.songManager:getEditingSceneIndex()
+    local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
     local currentSequence = self.sequenceManager.currentSequence
-    local currentSequenceSteps = self.sequenceManager:getCurrentSequenceSteps()
+    local currentSequenceSteps = editingScene[currentSequence]
+    
     for y = 1, 8 do
         for x = 1, 16 do
             local index = (y - 1) * 16 + x

@@ -1,4 +1,20 @@
 -- lib/midi_controller.lua
+
+MIDI_TARGET_NAMES = {"Midihub MH-13F7475 1"}
+
+MC101_NOTE_MAP = {
+    36, 38, 42, 46, 41, 45, 48, 49, 62, 63, 64, 37, 39, 51, 54, 56
+}
+T8_NOTE_MAP = {
+    36, 38, 42, 46, 48, 50
+}
+RAZZ_NOTE_MAP = {
+    36, 37, 38, 39, 40, 41, 42, 43
+}
+BB_NOTE_MAP = {
+    36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+}
+
 local MIDIController = {}
 MIDIController.__index = MIDIController
 
@@ -73,25 +89,18 @@ function MIDIController.new()
 end
 
 function MIDIController:init()
-    local MIDI_TARGET_NAMES = {"MC-101", "T-8"}
     
-    for i = 1, 2 do
+    for i = 1, #MIDI_TARGET_NAMES do
         local device = MIDIDevice.new(i, MIDI_TARGET_NAMES[i])
         device:connect()
         self.devices[i] = device
     end
 
-    local MC101_NOTE_MAP = {
-        36, 38, 42, 46, 41, 45, 48, 49, 62, 63, 64, 37, 39, 51, 54, 56
-    }
-    local T8_NOTE_MAP = {
-        36, 38, 42, 46, 48, 50
-    }
-
     -- Create drum machines
-    self.drumMachines[1] = DrumMachine.new(self.devices[1], 1, MC101_NOTE_MAP)  -- MC-101 first drum machine
-    self.drumMachines[2] = DrumMachine.new(self.devices[1], 2, MC101_NOTE_MAP)  -- MC-101 second drum machine
-    self.drumMachines[3] = DrumMachine.new(self.devices[2], 10, T8_NOTE_MAP)    -- T-8 drum machine
+    self.drumMachines[1] = DrumMachine.new(self.devices[1], 11, BB_NOTE_MAP)
+    self.drumMachines[2] = DrumMachine.new(self.devices[1], 2, MC101_NOTE_MAP)
+    self.drumMachines[3] = DrumMachine.new(self.devices[1], 10, RAZZ_NOTE_MAP)
+    self.drumMachines[4] = DrumMachine.new(self.devices[1], 11, BB_NOTE_MAP)
 end
 
 function MIDIController:sendAllNotesOff(drumMachineIndex)

@@ -15,6 +15,29 @@ function SongManager:init(params, sequenceManager)
     self.currentSong = nil
     self.SONGS_DIRECTORY = _path.dust .. "code/tens/songs/"
     self.sceneCount = 0
+    self.editingSceneIndex = 1
+end
+
+function SongManager:addNewScene()
+    if not self.currentSong then
+        print("Error: No song loaded")
+        return nil
+    end
+
+    local newScene = {}
+    for _, part in ipairs(self.currentSong.drum_parts) do
+        newScene[part] = {}
+        for i = 1, 128 do
+            newScene[part][i] = 0
+        end
+    end
+
+    table.insert(self.currentSong.scenes, newScene)
+    self.sceneCount = #self.currentSong.scenes
+
+    self.sequenceManager:loadScene(newScene)
+
+    return newScene
 end
 
 function SongManager:getCurrentSceneIndex()
@@ -27,6 +50,10 @@ function SongManager:getCurrentSceneIndex()
         end
     end
     return nil
+end
+
+function SongManager:getEditingSceneIndex()
+    return self.editingSceneIndex
 end
 
 function SongManager:loadScene(sceneIndex)
@@ -71,6 +98,7 @@ function SongManager:loadSong(filename)
         print("Number of scenes: " .. self.sceneCount)
         local first_scene = self.currentSong.scenes[1]
         self.sequenceManager:loadScene(first_scene)
+        self.editingSceneIndex = 1 
     else
         print("No scenes found in the song")
     end
@@ -115,6 +143,14 @@ function SongManager:saveSong(filename)
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
+end
+
+function SongManager:setEditingSceneIndex(index)
+    if self.currentSong and self.currentSong.scenes[index] then
+        self.editingSceneIndex = index
+        return true
+    end
+    return false
 end
 
 return SongManager

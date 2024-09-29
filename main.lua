@@ -18,7 +18,7 @@ function init()
     
     songManager = SongManager.new()
     songManager:init(params, sequenceManager)
-    songManager:loadSong("001.xml")
+    songManager:loadSong("004.xml")
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)

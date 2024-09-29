@@ -16,11 +16,12 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "metadata", "sequence", "load_save"}
+    self.pages = {"main", "sequence", "load_save"}
     self.currentPageIndex = 1
 
-    self.currentFileName = "001.xml"
+    self.currentFileName = "004.xml"
     self.confirmationModal = {active = false, action = nil, message = ""}
+    self.editingScene = 1
 end
 
 function DisplayManager:drawConfirmationModal()
@@ -69,7 +70,7 @@ function DisplayManager:drawMainPage()
 
     local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 30)
-    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
+    self.screen.text("Playing Scene: " .. (self.songManager:getCurrentSceneIndex() or "N/A"))
 
     self.screen.move(0, 40)
     self.screen.text("Sequence: " .. (self.currentSequence or "None"))
@@ -101,12 +102,15 @@ function DisplayManager:drawSequencePage()
     self.screen.move(0, 10)
     self.screen.text("Sequence Page")
     
-    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 20)
-    self.screen.text("Scene: " .. (currentSceneIndex or "N/A"))
+    local editingSceneIndex = self.songManager:getEditingSceneIndex()
+    self.screen.text("Editing Scene: " .. editingSceneIndex)
     
     self.screen.move(0, 30)
     self.screen.text("Current Sequence: " .. (self.currentSequence or "None"))
+    
+    self.screen.move(0, 40)
+    self.screen.text("K3: Add New Scene")
     
     self.screen.move(0, 50)
     self.screen.text("E2: scene // E3: sequence")
@@ -178,6 +182,10 @@ end
 
 function DisplayManager:updateCurrentScene(scene)
     self.currentScene = scene
+    self:redraw()
+end
+
+function DisplayManager:updateEditingScene(scene)
     self:redraw()
 end
 
