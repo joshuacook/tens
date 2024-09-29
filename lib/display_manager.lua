@@ -22,6 +22,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.currentFileName = "004.xml"
     self.confirmationModal = {active = false, action = nil, message = ""}
     self.editingScene = 1
+    self.editingSequence = nil
 end
 
 function DisplayManager:drawConfirmationModal()
@@ -107,7 +108,8 @@ function DisplayManager:drawSequencePage()
     self.screen.text("Editing Scene: " .. editingSceneIndex)
     
     self.screen.move(0, 30)
-    self.screen.text("Current Sequence: " .. (self.currentSequence or "None"))
+    local editingSequence = self.songManager:getEditingSequence() or "None"
+    self.screen.text("Editing Sequence: " .. editingSequence)
     
     self.screen.move(0, 40)
     self.screen.text("K3: Add New Scene")
@@ -139,7 +141,6 @@ function DisplayManager:showConfirmationModal(action, message)
 end
 
 function DisplayManager:redraw()
-    print("redraw")
     self.screen.clear()
     self.screen.font_face(1)
     self.screen.font_size(8)
@@ -186,6 +187,11 @@ function DisplayManager:updateCurrentScene(scene)
 end
 
 function DisplayManager:updateEditingScene(scene)
+    self:redraw()
+end
+
+function DisplayManager:updateEditingSequence(sequence)
+    self.editingSequence = sequence
     self:redraw()
 end
 

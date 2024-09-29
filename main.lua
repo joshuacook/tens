@@ -6,6 +6,14 @@ local MIDIController = include('lib/midi_controller')
 local SequenceManager = include('lib/sequence_manager')
 local SongManager = include('lib/song_manager')
 
+local function switch_scene()
+    local current_scene = songManager:getCurrentSceneIndex()
+    local new_scene = current_scene == 1 and 2 or 1
+    songManager:loadScene(new_scene)
+    displayManager:updateCurrentScene(new_scene)
+    params:set("current_scene", new_scene)
+end
+
 function init()
     local my_grid = grid.connect()
     print("Grid connected:", my_grid.device)
@@ -51,8 +59,8 @@ function init()
                 end
             end
             
-            if sixteenthNote == 1 and beat == 1 then
-                -- Add any per-measure logic here
+            if sixteenthNote == 4 and beat == 4 then
+                switch_scene()
             end
             
             if sixteenthNote == 1 then
@@ -73,7 +81,7 @@ function init()
         inputHandler:redrawGrid()
     end)
     inputHandler:redrawGrid()
-    params:set("current_scene", 1) 
+    params:set("current_scene", 1)
 end
 
 function redraw() displayManager:redraw() end
