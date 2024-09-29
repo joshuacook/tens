@@ -10,7 +10,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.screen = screen
     self.sequenceManager = sequenceManager
     self.songManager = songManager
-    self.currentSequence = self.sequenceManager.currentSequence
+    self.currentSequenceIndex = 1
     self.params = params
     self.bpm = self.params:get("clock_tempo")
     self.measureCount = 1
@@ -74,7 +74,7 @@ function DisplayManager:drawMainPage()
     self.screen.text("Playing Scene: " .. (self.songManager:getCurrentSceneIndex() or "N/A"))
 
     self.screen.move(0, 40)
-    self.screen.text("Sequence: " .. (self.currentSequence or "None"))
+    self.screen.text("Sequence: " .. (self.sequenceManager.currentSequence or "None"))
 
     self.screen.move(0, 50)
     self.screen.text("E2: scene // E3: BPM")
@@ -108,7 +108,8 @@ function DisplayManager:drawSequencePage()
     self.screen.text("Editing Scene: " .. editingSceneIndex)
     
     self.screen.move(0, 30)
-    self.screen.text("Current Sequence: " .. (self.currentSequence or "None"))
+    local currentSequence = self.sequenceManager.sequences[self.currentSequenceIndex]
+    self.screen.text("Sequence: " .. (currentSequence or "None"))
     
     self.screen.move(0, 40)
     self.screen.text("K3: Add New Scene")
@@ -177,6 +178,13 @@ end
 
 function DisplayManager:updateCurrentSequence(sequence)
     self.currentSequence = sequence or "None"
+    self.currentSequenceIndex = self.sequenceManager:getSequenceIndex(sequence)
+    self:redraw()
+end
+
+function DisplayManager:updateCurrentSequenceIndex(index)
+    self.currentSequenceIndex = index
+    self.currentSequence = self.sequenceManager.sequences[self.currentSequenceIndex]
     self:redraw()
 end
 
@@ -187,6 +195,7 @@ end
 
 function DisplayManager:updateEditingScene(scene)
     self:redraw()
+    self:updateCurrentSequenceIndex(1)
 end
 
 function DisplayManager:updateEditingSequence(sequence)

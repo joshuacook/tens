@@ -96,7 +96,6 @@ function MIDIController:init()
         self.devices[i] = device
     end
 
-    -- Create drum machines
     self.drumMachines[1] = DrumMachine.new(self.devices[1], 11, BB_NOTE_MAP)
     self.drumMachines[2] = DrumMachine.new(self.devices[1], 2, MC101_NOTE_MAP)
     self.drumMachines[3] = DrumMachine.new(self.devices[1], 10, RAZZ_NOTE_MAP)

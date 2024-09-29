@@ -130,7 +130,8 @@ function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
         local editingSceneIndex = self.songManager:getEditingSceneIndex()
         local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
-        local currentSequence = self.sequenceManager.currentSequence
+        local currentSequenceIndex = self.displayManager.currentSequenceIndex
+        local currentSequence = self.sequenceManager.sequences[currentSequenceIndex]
         local index = (y - 1) * 16 + x
         local currentValue = editingScene[currentSequence][index] or 0
         local newValue = (currentValue + 1) % 4  -- cycle through 0-3

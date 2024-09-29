@@ -37,6 +37,15 @@ function SequenceManager:getSequences()
     return self.sequences
 end
 
+function SequenceManager:getSequenceIndex(sequence)
+    for i, seq in ipairs(self.sequences) do
+        if seq == sequence then
+            return i
+        end
+    end
+    return nil
+end
+
 function SequenceManager:loadScene(scene)
     self.currentScene = scene
     self.currentSequenceIndex = 1
