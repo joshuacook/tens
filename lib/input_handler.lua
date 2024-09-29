@@ -15,6 +15,9 @@ function InputHandler:init(params, clockManager, displayManager, sequenceManager
     self.sequenceManager = sequenceManager
     self.songManager = songManager
 
+    self.currentBeat = 1
+    self.currentSixteenthNote = 1
+
     if my_grid then
         my_grid.key = function(x, y, z)
             self:handleGridPress(x, y, z)
@@ -85,8 +88,10 @@ function InputHandler:handleEnc(n, d)
     if n == 1 then
         if d > 0 then
             self.displayManager:nextPage()
+            self:redrawGrid()
         else
             self.displayManager:previousPage()
+            self:redrawGrid()
         end
     elseif n == 2 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
@@ -149,24 +154,37 @@ function InputHandler:redrawGrid()
     end
     my_grid:all(0)
     
-    local editingSceneIndex = self.songManager:getEditingSceneIndex()
-    local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
-    local currentSequence = self.displayManager.currentSequence
-    local currentSequenceSteps = editingScene[currentSequence]
-    
-    for y = 1, 8 do
-        for x = 1, 16 do
-            local index = (y - 1) * 16 + x
-            local value = currentSequenceSteps[index] or 0
-            my_grid:led(x, y, value * 4)  -- Scale 0-3 to 0-12
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+        local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
+        for y = 1, 8 do
+            my_grid:led(gridColumn, y, 15)  -- Full brightness
+        end
+    else
+        local editingSceneIndex = self.songManager:getEditingSceneIndex()
+        local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
+        local currentSequence = self.displayManager.currentSequence
+        local currentSequenceSteps = editingScene[currentSequence]
+        
+        for y = 1, 8 do
+            for x = 1, 16 do
+                local index = (y - 1) * 16 + x
+                local value = currentSequenceSteps[index] or 0
+                my_grid:led(x, y, value * 5)  -- Scale 0-3 to 0-12
+            end
         end
     end
     
     my_grid:refresh()
 end
 
+function InputHandler:updateBeat(beat, sixteenthNote)
+    self.currentBeat = beat
+    self.currentSixteenthNote = sixteenthNote
+    self:redrawGrid()
+end
+
 function InputHandler:updateGridLED(x, y, volume)
-    local brightness = volume * 4  -- Scale 0-3 to 0-15
+    local brightness = volume * 5  -- Scale 0-3 to 0-15
     my_grid:led(x, y, brightness)
     my_grid:refresh()
 end

@@ -41,6 +41,10 @@ function init()
         tick = function()
             local measure, beat, sixteenthNote = clockManager:getCurrentPosition()
             displayManager:updateMeasureCount(measure)
+            if displayManager.pages[displayManager.currentPageIndex] == "main" then
+                inputHandler:updateBeat(beat, sixteenthNote)
+            end
+
     
             local stepInMeasure = (beat - 1) * 4 + sixteenthNote
     
