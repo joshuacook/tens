@@ -108,8 +108,7 @@ function DisplayManager:drawSequencePage()
     self.screen.text("Editing Scene: " .. editingSceneIndex)
     
     self.screen.move(0, 30)
-    local editingSequence = self.songManager:getEditingSequence() or "None"
-    self.screen.text("Editing Sequence: " .. editingSequence)
+    self.screen.text("Current Sequence: " .. (self.currentSequence or "None"))
     
     self.screen.move(0, 40)
     self.screen.text("K3: Add New Scene")

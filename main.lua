@@ -77,11 +77,19 @@ function init()
     params:add_number("current_scene", "Current Scene", 1, #songManager.currentSong.scenes, 1)
     params:set_action("current_scene", function(value)
         songManager:loadScene(value)
-        displayManager:updateCurrentSequence(sequenceManager.currentSequence)
+        displayManager:updateCurrentScene(value)
+    end)
+
+    params:add_number("editing_scene", "Editing Scene", 1, #songManager.currentSong.scenes, 1)
+    params:set_action("editing_scene", function(value)
+        songManager:setEditingSceneIndex(value)
+        displayManager:updateEditingScene(value)
         inputHandler:redrawGrid()
     end)
+
     inputHandler:redrawGrid()
     params:set("current_scene", 1)
+    params:set("editing_scene", 1)
 end
 
 function redraw() displayManager:redraw() end
