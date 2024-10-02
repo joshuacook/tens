@@ -1,6 +1,6 @@
 -- lib/midi_controller.lua
 
-MIDI_TARGET_NAMES = {"Midihub MH-13F7475 1"}
+MIDI_TARGET_NAMES = {"Midihub MH-13F7475 1", "Midihub MH-13F7475 2"}
 
 MC101_NOTE_MAP = {
     36, 38, 42, 46, 41, 45, 48, 49, 62, 63, 64, 37, 39, 51, 54, 56
@@ -97,9 +97,7 @@ function MIDIController:init()
     end
 
     self.drumMachines[1] = DrumMachine.new(self.devices[1], 11, BB_NOTE_MAP)
-    self.drumMachines[2] = DrumMachine.new(self.devices[1], 2, MC101_NOTE_MAP)
-    self.drumMachines[3] = DrumMachine.new(self.devices[1], 10, RAZZ_NOTE_MAP)
-    self.drumMachines[4] = DrumMachine.new(self.devices[1], 11, BB_NOTE_MAP)
+    self.drumMachines[2] = DrumMachine.new(self.devices[2], 10, RAZZ_NOTE_MAP)
 end
 
 function MIDIController:sendAllNotesOff(drumMachineIndex)
