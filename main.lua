@@ -66,7 +66,7 @@ function init()
                 end
             end
 
-            if drumPatternManager:getCurrentPattern() then
+            if drumPatternManager:getPlayingPattern() then
                 drumPatternManager:playStep(stepInMeasure, 2)
             end
             

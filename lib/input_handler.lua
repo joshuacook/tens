@@ -150,8 +150,9 @@ function InputHandler:handleEnc(n, d)
             if self.displayManager.copyPatternModal then
                 self.displayManager.copyToPatternIndex = util.clamp(self.displayManager.copyToPatternIndex + d, 1, 8)
             else
-                self.displayManager.editingPatternIndex = util.clamp(self.displayManager.editingPatternIndex + d, 1, 8)
-                self.drumPatternManager:loadPattern(self.displayManager.editingPatternIndex)
+                local newEditingIndex = util.clamp(self.displayManager.editingPatternIndex + d, 1, 8)
+                self.drumPatternManager:setEditingPatternIndex(newEditingIndex)
+                self.displayManager.editingPatternIndex = newEditingIndex
             end
             self.displayManager:redraw()
             self:redrawGrid()
@@ -173,8 +174,9 @@ function InputHandler:handleEnc(n, d)
             self.displayManager:updateCurrentSequence(self.sequenceManager.currentSequence)
             self:redrawGrid()
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
-            self.displayManager.playingPatternIndex = util.clamp(self.displayManager.playingPatternIndex + d, 1, 8)
-            self.drumPatternManager:loadPattern(self.displayManager.playingPatternIndex)
+            local newPlayingIndex = util.clamp(self.displayManager.playingPatternIndex + d, 1, 8)
+            self.drumPatternManager:setPlayingPatternIndex(newPlayingIndex)
+            self.displayManager.playingPatternIndex = newPlayingIndex
             self.displayManager:redraw()
         end
     end
@@ -184,7 +186,7 @@ function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
             local index = (y - 1) * 16 + x
-            local currentPattern = self.drumPatternManager:getCurrentPattern()
+            local currentPattern = self.drumPatternManager:getEditingPattern()
             if currentPattern then
                 local currentValue = currentPattern[index] or 0
                 local newValue = (currentValue + 1) % 4  -- cycle through 0-3
@@ -220,7 +222,7 @@ function InputHandler:redrawGrid()
             my_grid:led(gridColumn, y, 15)  -- Full brightness
         end
     elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
-        local currentPattern = self.drumPatternManager:getCurrentPattern()
+        local currentPattern = self.drumPatternManager:getEditingPattern()
         if currentPattern then
             for y = 1, 8 do
                 for x = 1, 16 do
