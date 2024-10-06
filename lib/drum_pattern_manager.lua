@@ -32,9 +32,14 @@ end
 
 function DrumPatternManager:getPatternStep(step)
     if self.currentPattern then
-        return self.currentPattern[step]
+        local result = {}
+        for drum = 1, 8 do
+            local index = (drum - 1) * 16 + step
+            result[drum] = self.currentPattern[index] or 0
+        end
+        return result
     end
-    return 0
+    return {}
 end
 
 function DrumPatternManager:nextPattern()
@@ -52,11 +57,13 @@ function DrumPatternManager:previousPattern()
 end
 
 function DrumPatternManager:playStep(step, drumMachineIndex)
-    if self.currentPattern and self.currentPattern[step] then
-        local velocity = self.currentPattern[step]
-        if velocity > 0 then
-            print("Playing step " .. step .. " with velocity " .. velocity .. " on drum machine " .. drumMachineIndex)
-            self.midiController:sendNote(drumMachineIndex, 1, math.floor(velocity * 127/4))
+    if self.currentPattern then
+        for drum = 1, 8 do
+            local index = (drum - 1) * 16 + step
+            local velocity = self.currentPattern[index]
+            if velocity and velocity > 0 then
+                self.midiController:sendNote(drumMachineIndex, drum, math.floor(velocity * 127))
+            end
         end
     end
 end
