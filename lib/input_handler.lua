@@ -14,6 +14,7 @@ function InputHandler:init(params, clockManager, displayManager, sequenceManager
     self.displayManager = displayManager
     self.sequenceManager = sequenceManager
     self.songManager = songManager
+    self.isShiftPressed = false
 
     self.currentBeat = 1
     self.currentSixteenthNote = 1
@@ -71,12 +72,18 @@ function InputHandler:handleRegularKey(n, z)
         if n == 2 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("load", "Load " .. self.displayManager.currentFileName .. "?")
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+                self.songManager:moveSelectedPairIndex(-1)
+                self.displayManager:redraw()
             else
                 self.clockManager:togglePlay()
             end
         elseif n == 3 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("save", "Save to " .. self.displayManager.currentFileName .. "?")
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+                self.songManager:moveSelectedPairIndex(1)
+                self.displayManager:redraw()
             elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
                 self:addNewScene()
             end
@@ -96,6 +103,9 @@ function InputHandler:handleEnc(n, d)
     elseif n == 2 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
             self.displayManager:updateFileName(d)
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+            self.songManager:adjustSelectedPairScene(d)
+            self.displayManager:redraw()
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
             local sceneCount = self.songManager.sceneCount
             if sceneCount > 0 then
@@ -119,6 +129,9 @@ function InputHandler:handleEnc(n, d)
             local newBPM = util.clamp(self.params:get("clock_tempo") + d, 20, 300)
             self.params:set("clock_tempo", newBPM)
             self.displayManager:updateBPM(newBPM)
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+            self.songManager:adjustSelectedPairDuration(d)
+            self.displayManager:redraw()
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
             if d > 0 then
                 self.sequenceManager:nextSequence()

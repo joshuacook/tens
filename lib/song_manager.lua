@@ -8,7 +8,7 @@ function SongManager.new()
     return setmetatable({}, SongManager)
 end
 
-function SongManager:init(params, sequenceManager)
+function SongManager:init(params, sequenceManager, song_file)
     self.params = params
     self.sequenceManager = sequenceManager
     self.xmlParser = XMLParser.new()
@@ -16,6 +16,11 @@ function SongManager:init(params, sequenceManager)
     self.SONGS_DIRECTORY = _path.dust .. "code/tens/songs/"
     self.sceneCount = 0
     self.editingSceneIndex = 1
+    self.songPosition = 1
+    self.scenePlayCounter = 0
+    self.selectedPairIndex = 1
+
+    self:loadSong(song_file)
 end
 
 function SongManager:addNewScene()
@@ -103,6 +108,15 @@ function SongManager:loadSong(filename)
         print("No scenes found in the song")
     end
 
+    self.songPosition = 1
+    self.scenePlayCounter = 0
+    self.selectedPairIndex = 1
+
+    if #self.currentSong.song_structure > 0 then
+        local pair = self.currentSong.song_structure[1]
+        self:loadScene(pair.scene)
+    end
+
     return true
 end
 
@@ -151,6 +165,50 @@ function SongManager:setEditingSceneIndex(index)
         return true
     end
     return false
+end
+
+function SongManager:getCurrentSceneDuration()
+    local pair = self.currentSong.song_structure[self.songPosition]
+    return pair.duration
+end
+
+function SongManager:getCurrentSceneIndex()
+    local pair = self.currentSong.song_structure[self.songPosition]
+    return pair.scene
+end
+
+function SongManager:advanceSongPosition()
+    self.songPosition = self.songPosition + 1
+    if self.songPosition > #self.currentSong.song_structure then
+        self.songPosition = 1
+    end
+    self.scenePlayCounter = 0
+    local pair = self.currentSong.song_structure[self.songPosition]
+    self:loadScene(pair.scene)
+end
+
+function SongManager:moveSelectedPairIndex(delta)
+    self.selectedPairIndex = util.clamp(self.selectedPairIndex + delta, 1, #self.currentSong.song_structure)
+end
+
+function SongManager:adjustSelectedPairScene(delta)
+    local pair = self.currentSong.song_structure[self.selectedPairIndex]
+    if pair then
+        pair.scene = util.clamp(pair.scene + delta, 1, self.sceneCount)
+    end
+end
+
+function SongManager:adjustSelectedPairDuration(delta)
+    local pair = self.currentSong.song_structure[self.selectedPairIndex]
+    if pair then
+        pair.duration = math.max(1, pair.duration + delta)
+    end
+end
+
+function SongManager:resetSongPosition()
+    self.currentSongPosition = 1
+    self.scenePlayCounter = 0
+    self:loadScene(self.currentSong.song_structure[1].scene)
 end
 
 return SongManager

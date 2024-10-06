@@ -17,7 +17,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "sequence", "load_save"}
+    self.pages = {"main", "sequence", "song","load_save"}
     self.currentPageIndex = 1
 
     self.currentFileName = "004.xml"
@@ -116,6 +116,52 @@ function DisplayManager:drawSequencePage()
     self.screen.text("E2: scene // E3: sequence")
 end
 
+function DisplayManager:drawSongPage()
+    self.screen.level(15)
+    self.screen.move(0, 10)
+    self.screen.text("Song Page")
+
+    local song_structure = self.songManager.currentSong.song_structure
+    if not song_structure then
+        self.screen.move(0, 20)
+        self.screen.text("No song structure")
+        return
+    end
+
+    local cols_per_page = 4
+    local rows_per_col = 6
+
+    local total_pairs = #song_structure
+    local col_width = 30
+    local row_height = 8
+
+    for col = 1, cols_per_page do
+        local x = (col - 1) * col_width
+        self.screen.move(x, 20)
+        self.screen.text("sc dr")
+    end
+
+    for row = 1, rows_per_col do
+        for col = 1, cols_per_page do
+            local x = (col - 1) * col_width
+            local y = 20 + row * row_height
+            local index = (row - 1) * cols_per_page + col
+            if index <= total_pairs then
+                local pair = song_structure[index]
+                local scene_str = string.format("%02d", pair.scene)
+                local duration_str = string.format("%02d", pair.duration)
+                self.screen.move(x, y)
+                if index == self.songManager.selectedPairIndex then
+                    self.screen.level(15)
+                else
+                    self.screen.level(5)
+                end
+                self.screen.text(scene_str .. " " .. duration_str)
+            end
+        end
+    end
+end
+
 function DisplayManager:hideConfirmationModal()
     self.confirmationModal.active = false
     self:redraw()
@@ -150,6 +196,8 @@ function DisplayManager:redraw()
         self:drawMetadataPage()
     elseif currentPage == "sequence" then
         self:drawSequencePage()
+    elseif currentPage == "song" then
+        self:drawSongPage()
     elseif currentPage == "load_save" then
         self:drawLoadSavePage()
     end

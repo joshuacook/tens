@@ -27,6 +27,20 @@ function XMLParser:parse_song(content)
         print("Drum part:", part)
     end
 
+    song.song_structure = {}
+    local song_structure_data = content:match("<song_structure>(.-)</song_structure>")
+    if song_structure_data then
+        for line in song_structure_data:gmatch("[^>]+") do
+            for scene_str, duration_str in line:gmatch("(%d+)%s+(%d+)") do
+                local scene = tonumber(scene_str)
+                local duration = tonumber(duration_str)
+                if scene and duration then
+                    table.insert(song.song_structure, {scene = scene, duration = duration})
+                end
+            end
+        end
+    end
+
     for scene_chunk in content:gmatch("<scene>(.-)</scene>") do
         local scene = {}
         
@@ -67,6 +81,15 @@ function XMLParser:serialize_song(song)
         end
     end
     output = output .. "</drum_parts>\n"
+    
+    output = output .. "<song_structure>\n"
+    for i, pair in ipairs(song.song_structure) do
+        output = output .. string.format("%02d %02d  ", pair.scene, pair.duration)
+        if i % 4 == 0 then
+            output = output .. "\n"
+        end
+    end
+    output = output .. "</song_structure>\n"
 
     output = output .. "<scenes>\n"
     for _, scene in ipairs(song.scenes) do

@@ -99,6 +99,7 @@ function ClockManager:stop()
     if self.isPlaying then
         self.isPlaying = false
         self.displayManager:togglePlay()
+        self.songManager:resetSongPosition() 
         self:notifyListeners("stop")
     end
 end

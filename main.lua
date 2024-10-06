@@ -25,14 +25,13 @@ function init()
     sequenceManager:init(midiController)
     
     songManager = SongManager.new()
-    songManager:init(params, sequenceManager)
-    songManager:loadSong("004.xml")
+    songManager:init(params, sequenceManager, "004.xml")
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)
     
     clockManager = ClockManager.new()
-    clockManager:init(clock, params, displayManager)
+    clockManager:init(clock, params, displayManager, songManager)
     
     inputHandler = InputHandler.new()
     inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager)
@@ -57,24 +56,25 @@ function init()
                         drumIndex = drumIndex + 8
                     end
                     if value > 0 then
-                        print(seq, drumMachineIndex, drumIndex, value)
-                        local velocity = math.floor(value * 42)  -- Assuming value is between 0 and 3
+                        local velocity = math.floor(value * 42)
                         midiController:sendNote(drumMachineIndex, drumIndex, velocity)
                     end
                 end
             end
             
             if sixteenthNote == 4 and beat == 4 then
-                switch_scene()
+                songManager.scenePlayCounter = songManager.scenePlayCounter + 1
+                local currentSceneDuration = songManager:getCurrentSceneDuration()
+                if songManager.scenePlayCounter >= currentSceneDuration then
+                    songManager:advanceSongPosition()
+                    displayManager:updateCurrentScene(songManager:getCurrentSceneIndex())
+                end
             end
             
             if sixteenthNote == 1 then
-                -- Add any per-beat logic here
             end
             
             if sixteenthNote == 1 and beat == 1 and measure % 4 == 0 then
-                -- This executes every 4 measures
-                -- Add your logic here
             end
         end
     })
