@@ -109,10 +109,13 @@ function InputHandler:handleRegularKey(n, z)
                 self.displayManager:redraw()
             elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
                 self:addNewScene()
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
+                local success = self.songManager:saveDrummerPatterns()
             end
         end
     end
 end
+
 
 function InputHandler:handleEnc(n, d)
     if n == 1 then
