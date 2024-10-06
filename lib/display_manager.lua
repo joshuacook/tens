@@ -6,10 +6,11 @@ function DisplayManager.new()
     return setmetatable({}, DisplayManager)
 end
 
-function DisplayManager:init(screen, params, sequenceManager, songManager)
+function DisplayManager:init(screen, params, sequenceManager, songManager, drumPatternManager)
     self.screen = screen
     self.sequenceManager = sequenceManager
     self.songManager = songManager
+    self.drumPatternManager = drumPatternManager
     self.currentSequenceIndex = 1
     self.currentSequence = self.sequenceManager.sequences[self.currentSequenceIndex]
     self.params = params
@@ -17,13 +18,15 @@ function DisplayManager:init(screen, params, sequenceManager, songManager)
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "sequence", "song","load_save"}
+    self.pages = {"main", "drummer", "sequence", "song","load_save"}
     self.currentPageIndex = 1
 
     self.currentFileName = "004.xml"
     self.confirmationModal = {active = false, action = nil, message = ""}
     self.editingScene = 1
     self.editingSequence = nil
+    self.editingPatternIndex = 1
+    self.playingPatternIndex = 1
 end
 
 function DisplayManager:drawConfirmationModal()
@@ -37,6 +40,34 @@ function DisplayManager:drawConfirmationModal()
     
     self.screen.move(15, 45)
     self.screen.text("K2: Confirm  K3: Cancel")
+end
+
+function DisplayManager:drawCopyPatternModal()
+    self.screen.level(15)
+    self.screen.rect(10, 20, 108, 30)
+    self.screen.fill()
+    
+    self.screen.level(0)
+    self.screen.move(15, 35)
+    self.screen.text("Copy pattern " .. self.editingPatternIndex .. " to " .. self.copyToPatternIndex)
+    
+    self.screen.move(15, 45)
+    self.screen.text("K2: Confirm  K3: Cancel")
+end
+
+function DisplayManager:drawDrummerPage()
+    self.screen.level(15)
+    self.screen.move(0, 10)
+    self.screen.text("Drummer Page")
+    
+    self.screen.move(0, 30)
+    self.screen.text("Editing: " .. self.editingPatternIndex .. " Playing: " .. self.playingPatternIndex)
+        
+    self.screen.move(0, 40)
+    self.screen.text("E2: Edit // E3: Play")
+    
+    self.screen.move(0, 50)
+    self.screen.text("K2: Copy Pattern")
 end
 
 function DisplayManager:drawLoadSavePage()
@@ -192,6 +223,8 @@ function DisplayManager:redraw()
     local currentPage = self.pages[self.currentPageIndex]
     if currentPage == "main" then
         self:drawMainPage()
+    elseif currentPage == "drummer" then
+        self:drawDrummerPage()
     elseif currentPage == "metadata" then
         self:drawMetadataPage()
     elseif currentPage == "sequence" then
@@ -204,6 +237,8 @@ function DisplayManager:redraw()
 
     if self.confirmationModal.active then
         self:drawConfirmationModal()
+    elseif self.copyPatternModal then
+        self:drawCopyPatternModal()
     end
 
     self.screen.move(0, 60)

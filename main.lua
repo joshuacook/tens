@@ -32,13 +32,13 @@ function init()
     songManager:init(params, sequenceManager, drumPatternManager, "005.xml")
     
     displayManager = DisplayManager.new()
-    displayManager:init(screen, params, sequenceManager, songManager)
+    displayManager:init(screen, params, sequenceManager, songManager, drumPatternManager)
     
     clockManager = ClockManager.new()
     clockManager:init(clock, params, displayManager, songManager)
     
     inputHandler = InputHandler.new()
-    inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager)
+    inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager, drumPatternManager)
 
     clockManager:addListener({
         tick = function()

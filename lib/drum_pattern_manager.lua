@@ -10,7 +10,15 @@ function DrumPatternManager:init(midiController)
     self.midiController = midiController
     self.currentPattern = nil
     self.patterns = {}
-    self.currentPatternIndex = nil
+    self.currentPatternIndex = 1
+    
+    -- Initialize 8 empty patterns
+    for i = 1, 8 do
+        self.patterns[i] = {}
+        for j = 1, 128 do
+            self.patterns[i][j] = 0
+        end
+    end
 end
 
 function DrumPatternManager:loadPatterns(patterns)
@@ -20,9 +28,6 @@ function DrumPatternManager:loadPatterns(patterns)
         self.currentPattern = self.patterns[self.currentPatternIndex]
     else
         print("Warning: No patterns to load")
-        self.patterns = {}
-        self.currentPatternIndex = nil
-        self.currentPattern = nil
     end
 end
 
@@ -32,28 +37,30 @@ end
 
 function DrumPatternManager:getPatternStep(step)
     if self.currentPattern then
-        local result = {}
-        for drum = 1, 8 do
-            local index = (drum - 1) * 16 + step
-            result[drum] = self.currentPattern[index] or 0
-        end
-        return result
+        return self.currentPattern[step]
     end
-    return {}
+    return 0
+end
+
+function DrumPatternManager:setPatternStep(patternIndex, step, value)
+    if self.patterns[patternIndex] then
+        self.patterns[patternIndex][step] = value
+        if patternIndex == self.currentPatternIndex then
+            self.currentPattern = self.patterns[patternIndex]
+        end
+    else
+        print("Warning: Invalid pattern index")
+    end
 end
 
 function DrumPatternManager:nextPattern()
-    if #self.patterns > 0 then
-        self.currentPatternIndex = (self.currentPatternIndex % #self.patterns) + 1
-        self.currentPattern = self.patterns[self.currentPatternIndex]
-    end
+    self.currentPatternIndex = (self.currentPatternIndex % #self.patterns) + 1
+    self.currentPattern = self.patterns[self.currentPatternIndex]
 end
 
 function DrumPatternManager:previousPattern()
-    if #self.patterns > 0 then
-        self.currentPatternIndex = ((self.currentPatternIndex - 2 + #self.patterns) % #self.patterns) + 1
-        self.currentPattern = self.patterns[self.currentPatternIndex]
-    end
+    self.currentPatternIndex = ((self.currentPatternIndex - 2) % #self.patterns) + 1
+    self.currentPattern = self.patterns[self.currentPatternIndex]
 end
 
 function DrumPatternManager:playStep(step, drumMachineIndex)
@@ -73,11 +80,22 @@ function DrumPatternManager:setPatterns(patterns)
 end
 
 function DrumPatternManager:loadPattern(patternIndex)
-    if self.patterns and self.patterns[patternIndex] then
+    if self.patterns[patternIndex] then
         self.currentPatternIndex = patternIndex
         self.currentPattern = self.patterns[patternIndex]
     else
         print("Warning: Invalid pattern index")
+    end
+end
+
+function DrumPatternManager:copyPattern(sourceIndex, destIndex)
+    if self.patterns[sourceIndex] and self.patterns[destIndex] then
+        for i = 1, 128 do
+            self.patterns[destIndex][i] = self.patterns[sourceIndex][i]
+        end
+        print("Pattern copied from " .. sourceIndex .. " to " .. destIndex)
+    else
+        print("Warning: Invalid source or destination pattern index")
     end
 end
 
