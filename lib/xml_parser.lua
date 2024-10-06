@@ -16,6 +16,7 @@ function XMLParser:parse_song(content)
 
     song.title = content:match("<title>%s*(.-)%s*</title>")
     song.bpm = tonumber(content:match("<bpm>(%d+)</bpm>"))
+    song.drummer = content:match("<drummer>%s*(.-)%s*</drummer>")
     local drum_parts_string = content:match("<drum_parts>(.-)</drum_parts>")
     song.drum_parts = {}
     for part in drum_parts_string:gmatch("[^,]+") do
@@ -23,6 +24,7 @@ function XMLParser:parse_song(content)
     end
     print("Song title:", song.title)
     print("Song bpm:", song.bpm)
+    print("Song drummer:", song.drummer)
     for _, part in ipairs(song.drum_parts) do
         print("Drum part:", part)
     end
@@ -70,8 +72,32 @@ function XMLParser:parse_song(content)
     return song
 end
 
+function XMLParser:parse_drummer_patterns(content)
+    local patterns = {}
+    content = content:gsub("\n", "")
+    content = content:gsub("> ", ">")
+    content = content:gsub("  ", " ")
+
+    for pattern_chunk in content:gmatch("<pattern>(.-)</pattern>") do
+        local pattern = {}
+        for step in pattern_chunk:gmatch("%S+") do
+            table.insert(pattern, tonumber(step) or 0)
+        end
+        if #pattern == 128 then
+            table.insert(patterns, pattern)
+        else
+            print("Warning: Expected 128 steps for pattern, got " .. #pattern)
+        end
+    end
+    return patterns
+end
+
 function XMLParser:serialize_song(song)
     local output = string.format('<title>%s</title>\n<bpm>%d</bpm>\n', song.title, song.bpm)
+
+    if song.drummer then
+        output = output .. string.format("<drummer>%s</drummer>\n", song.drummer)
+    end
 
     output = output .. "<drum_parts>"
     for i, part in ipairs(song.drum_parts) do
@@ -112,6 +138,24 @@ function XMLParser:serialize_song(song)
     end
     
     output = output .. "</scenes>\n"
+    return output
+end
+
+function XMLParser:serialize_drummer_patterns(patterns)
+    local output = "<patterns>\n"
+    for _, pattern in ipairs(patterns) do
+        output = output .. "<pattern>\n"
+        for i = 1, 8 do
+            output = output .. "  "
+            for j = 1, 16 do
+                local index = (i - 1) * 16 + j
+                output = output .. string.format("%d ", pattern[index])
+            end
+            output = output .. "\n"
+        end
+        output = output .. "</pattern>\n"
+    end
+    output = output .. "</patterns>"
     return output
 end
 

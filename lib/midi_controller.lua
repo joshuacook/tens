@@ -111,6 +111,9 @@ function MIDIController:sendAllNotesOff(drumMachineIndex)
 end
 
 function MIDIController:sendNote(drumMachineIndex, sampleIndex, velocity)
+    if drumMachineIndex == 2 then
+        print("Sending note to drum machine " .. drumMachineIndex .. " with sample index " .. sampleIndex .. " and velocity " .. velocity)
+    end
     local drumMachine = self.drumMachines[drumMachineIndex]
     if drumMachine then
         drumMachine:sendNote(sampleIndex, velocity)

@@ -8,17 +8,20 @@ function SongManager.new()
     return setmetatable({}, SongManager)
 end
 
-function SongManager:init(params, sequenceManager, song_file)
+function SongManager:init(params, sequenceManager, drumPatternManager, song_file)
     self.params = params
     self.sequenceManager = sequenceManager
+    self.drumPatternManager = drumPatternManager
     self.xmlParser = XMLParser.new()
     self.currentSong = nil
     self.SONGS_DIRECTORY = _path.dust .. "code/tens/songs/"
+    self.DRUMMERS_DIRECTORY = _path.dust .. "code/tens/drummers/"
     self.sceneCount = 0
     self.editingSceneIndex = 1
     self.songPosition = 1
     self.scenePlayCounter = 0
     self.selectedPairIndex = 1
+    self.drummerPatterns = nil
 
     self:loadSong(song_file)
 end
@@ -72,6 +75,20 @@ function SongManager:loadScene(sceneIndex)
     return true
 end
 
+function SongManager:loadDrummerPatterns(drummer)
+    local full_path = self.DRUMMERS_DIRECTORY .. drummer .. ".xml"
+    local file, err = io.open(full_path, "r")
+    if not file then
+        print("Error: Could not open drummer file. Error: " .. (err or "unknown error"))
+        return false
+    end
+
+    local content = file:read("*a")
+    file:close()
+    self.drummerPatterns = self.xmlParser:parse_drummer_patterns(content)
+    return true
+end
+
 function SongManager:loadSong(filename)
     print("Loading song: " .. filename)
     local full_path = self.SONGS_DIRECTORY .. filename
@@ -94,6 +111,14 @@ function SongManager:loadSong(filename)
     self.currentSong = song
     self.currentSong.filename = filename
     self.sceneCount = #self.currentSong.scenes
+
+    if song.drummer then
+        if not self:loadDrummerPatterns(song.drummer) then
+            print("Warning: Failed to load drummer patterns")
+        else
+            self.drumPatternManager:setPatterns(self.drummerPatterns)
+        end
+    end
 
     self.params:set("clock_tempo", self.currentSong.bpm or 120)
     self.sequenceManager:setSequences(self.currentSong.drum_parts)
@@ -152,6 +177,25 @@ function SongManager:saveSong(filename)
         file:write(self.xmlParser:serialize_song(self.currentSong))
         file:close()
         print("Song saved successfully as " .. filename)
+        return true
+    else
+        print("Error: Could not open file. Error: " .. (err or "unknown error"))
+        return false
+    end
+end
+
+function SongManager:saveDrummerPatterns()
+    if not self.drummerPatterns or not self.currentSong.drummer then
+        print("Error: No drummer patterns to save or no drummer specified")
+        return false
+    end
+
+    local full_path = self.DRUMMERS_DIRECTORY .. self.currentSong.drummer .. ".xml"
+    local file, err = io.open(full_path, "w")
+    if file then
+        file:write(self.xmlParser:serialize_drummer_patterns(self.drummerPatterns))
+        file:close()
+        print("Drummer patterns saved successfully for " .. self.currentSong.drummer)
         return true
     else
         print("Error: Could not open file. Error: " .. (err or "unknown error"))

@@ -1,6 +1,7 @@
 -- main.lua
 local ClockManager = include('lib/clock_manager')
 local DisplayManager = include('lib/display_manager')
+local DrumPatternManager = include('lib/drum_pattern_manager')
 local InputHandler = include('lib/input_handler')
 local MIDIController = include('lib/midi_controller')
 local SequenceManager = include('lib/sequence_manager')
@@ -21,11 +22,14 @@ function init()
     midiController = MIDIController.new()
     midiController:init()
     
+    drumPatternManager = DrumPatternManager.new()
+    drumPatternManager:init(midiController)
+    
     sequenceManager = SequenceManager.new()
     sequenceManager:init(midiController)
     
     songManager = SongManager.new()
-    songManager:init(params, sequenceManager, "004.xml")
+    songManager:init(params, sequenceManager, drumPatternManager, "005.xml")
     
     displayManager = DisplayManager.new()
     displayManager:init(screen, params, sequenceManager, songManager)
@@ -60,6 +64,10 @@ function init()
                         midiController:sendNote(drumMachineIndex, drumIndex, velocity)
                     end
                 end
+            end
+
+            if drumPatternManager:getCurrentPattern() then
+                drumPatternManager:playStep(stepInMeasure, 2)
             end
             
             if sixteenthNote == 4 and beat == 4 then

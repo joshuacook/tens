@@ -6,14 +6,13 @@ function ClockManager.new()
     return setmetatable({}, ClockManager)
 end
 
-function ClockManager:init(clock, params, displayManager)
+function ClockManager:init(clock, params, displayManager, songManager)
     self.clock = clock
     self.params = params
     self.displayManager = displayManager
+    self.songManager = songManager
     self.listeners = {}
-    self.currentMeasure = 1
-    self.currentBeat = 1
-    self.currentSixteenth = 1
+    self:reset()
     self.isPlaying = false
 
     self.clock.tempo_change_handler = function(bpm)
@@ -77,6 +76,12 @@ function ClockManager:removeListener(listener)
     end
 end
 
+function ClockManager:reset()
+    self.currentMeasure = 0
+    self.currentBeat = 0
+    self.currentSixteenth = 0
+end
+
 function ClockManager:setSource(source)
     self.clock.set_source(source)
 end
@@ -88,20 +93,17 @@ function ClockManager:setTempo(bpm)
 end
 
 function ClockManager:start()
-    if not self.isPlaying then
-        self.isPlaying = true
-        self.displayManager:togglePlay()
-        self:notifyListeners("start")
-    end
+    self.isPlaying = true
+    self.displayManager:togglePlay()
+    self:notifyListeners("start")
 end
 
 function ClockManager:stop()
-    if self.isPlaying then
-        self.isPlaying = false
-        self.displayManager:togglePlay()
-        self.songManager:resetSongPosition() 
-        self:notifyListeners("stop")
-    end
+    self.isPlaying = false
+    self.displayManager:togglePlay()
+    self.songManager:resetSongPosition() 
+    self:reset()
+    self:notifyListeners("stop")
 end
 
 function ClockManager:tick()
