@@ -1,5 +1,7 @@
 -- lib/input_handler.lua
 local InputHandler = {}
+local brightnesses = {0, 2, 4, 6, 8, 10, 12, 14, 15}
+
 InputHandler.__index = InputHandler
 
 function InputHandler.new()
@@ -159,6 +161,11 @@ function InputHandler:handleEnc(n, d)
             end
             self.displayManager:redraw()
             self:redrawGrid()
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
+            local newTransitionIndex = util.clamp(self.displayManager.currentTransitionIndex + d, 1, 16)
+            self.displayManager.currentTransitionIndex = newTransitionIndex
+            self.displayManager:redraw()
+            self:redrawGrid()
         end
     elseif n == 3 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
@@ -187,7 +194,16 @@ end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
-        if self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
+            local index = (y - 1) * 8 + x
+            local currentTransition = self.songManager.transitions[self.displayManager.currentTransitionIndex]
+            if currentTransition then
+                local currentValue = currentTransition[index] or 0
+                local newValue = (currentValue + 1) % 9  -- cycle through 0-8
+                currentTransition[index] = newValue
+                self:updateGridLED(x, y, newValue)
+            end
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
             local index = (y - 1) * 16 + x
             local currentPattern = self.drumPatternManager:getEditingPattern()
             if currentPattern then
@@ -219,7 +235,20 @@ function InputHandler:redrawGrid()
     end
     my_grid:all(0)
     
-    if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+    
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
+        local currentTransition = self.songManager.transitions[self.displayManager.currentTransitionIndex]
+        if currentTransition then
+            for y = 1, 8 do
+                for x = 1, 8 do
+                    local index = (y - 1) * 8 + x
+                    local value = currentTransition[index] or 0
+                    local brightness = brightnesses[value + 1]
+                    my_grid:led(x, y, brightness)
+                end
+            end
+        end
+    elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
         local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
         for y = 1, 8 do
             my_grid:led(gridColumn, y, 15)  -- Full brightness
@@ -259,8 +288,13 @@ function InputHandler:updateBeat(beat, sixteenthNote)
     self:redrawGrid()
 end
 
-function InputHandler:updateGridLED(x, y, volume)
-    local brightness = volume * 5  -- Scale 0-3 to 0-15
+function InputHandler:updateGridLED(x, y, value)
+    local brightness
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then        
+        brightness = brightnesses[value + 1]
+    else
+        brightness = value * 5  -- Scale 0-3 to 0-15
+    end
     my_grid:led(x, y, brightness)
     my_grid:refresh()
 end

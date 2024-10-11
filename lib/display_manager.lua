@@ -18,7 +18,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager, drumP
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "drummer", "sequence", "song","load_save"}
+    self.pages = {"main", "drummer", "transitions", "sequence", "song","load_save"}
     self.currentPageIndex = 1
 
     self.currentFileName = "004.xml"
@@ -27,6 +27,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager, drumP
     self.editingSequence = nil
     self.editingPatternIndex = 1
     self.playingPatternIndex = 1
+    self.currentTransitionIndex = 1
 end
 
 function DisplayManager:drawConfirmationModal()
@@ -193,6 +194,21 @@ function DisplayManager:drawSongPage()
     end
 end
 
+function DisplayManager:drawTransitionsPage()
+    self.screen.level(15)
+    self.screen.move(0, 10)
+    self.screen.text("Transitions Page")
+    
+    self.screen.move(0, 30)
+    self.screen.text("Editing Transition: " .. self.currentTransitionIndex)
+    
+    self.screen.move(0, 40)
+    self.screen.text("E2: Change Transition")
+    
+    self.screen.move(0, 50)
+    self.screen.text("K2: Save Transitions")
+end
+
 function DisplayManager:hideConfirmationModal()
     self.confirmationModal.active = false
     self:redraw()
@@ -233,6 +249,8 @@ function DisplayManager:redraw()
         self:drawSongPage()
     elseif currentPage == "load_save" then
         self:drawLoadSavePage()
+    elseif currentPage == "transitions" then
+        self:drawTransitionsPage()
     end
 
     if self.confirmationModal.active then

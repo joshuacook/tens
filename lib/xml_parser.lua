@@ -92,6 +92,22 @@ function XMLParser:parse_drummer_patterns(content)
     return patterns
 end
 
+function XMLParser:parse_transitions(content)
+    local transitions = {}
+    for transition_chunk in content:gmatch("<transition>(.-)</transition>") do
+        local matrix = {}
+        for number in transition_chunk:gmatch("%d+") do
+            table.insert(matrix, tonumber(number))
+        end
+        if #matrix == 64 then
+            table.insert(transitions, matrix)
+        else
+            print("Warning: Expected 64 numbers for transition, got " .. #matrix)
+        end
+    end
+    return transitions
+end
+
 function XMLParser:serialize_song(song)
     local output = string.format('<title>%s</title>\n<bpm>%d</bpm>\n', song.title, song.bpm)
 

@@ -77,7 +77,7 @@ function ClockManager:removeListener(listener)
 end
 
 function ClockManager:reset()
-    self.currentMeasure = 0
+    self.currentMeasure = 1
     self.currentBeat = 0
     self.currentSixteenth = 0
 end

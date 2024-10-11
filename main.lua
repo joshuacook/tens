@@ -43,6 +43,29 @@ function init()
     clockManager:addListener({
         tick = function()
             local measure, beat, sixteenthNote = clockManager:getCurrentPosition()
+            local transitionIndex = math.max(1, (measure - 1) % 4 * 4 + beat)
+            local transition = songManager.transitions[transitionIndex]
+            local probabilities = {}
+            local currentPattern = drumPatternManager.playingPatternIndex
+            for i = 1, 8 do
+                probabilities[i] = transition[(currentPattern - 1) * 8 + i]
+            end
+            local randomValue = math.random() * 8 
+
+            local search_value = 0
+            for i = 1, 8 do
+                search_value = search_value + probabilities[i]
+                if randomValue <= search_value then
+                    drumPatternManager:setPlayingPatternIndex(i)
+                    if displayManager.pages[displayManager.currentPageIndex] == "drummer" then
+                        displayManager.playingPatternIndex = i
+                        displayManager:redraw()
+                    end
+                    break
+                end
+            end
+            
+            print(measure, beat, transitionIndex)
             displayManager:updateMeasureCount(measure)
             if displayManager.pages[displayManager.currentPageIndex] == "main" then
                 inputHandler:updateBeat(beat, sixteenthNote)

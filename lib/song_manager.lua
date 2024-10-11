@@ -22,7 +22,7 @@ function SongManager:init(params, sequenceManager, drumPatternManager, song_file
     self.scenePlayCounter = 0
     self.selectedPairIndex = 1
     self.drummerPatterns = nil
-
+    self.transitions = nil
     self:loadSong(song_file)
 end
 
@@ -142,6 +142,21 @@ function SongManager:loadSong(filename)
         self:loadScene(pair.scene)
     end
 
+    self:loadTransitions()
+
+    return true
+end
+
+function SongManager:loadTransitions()
+    local file_path = self.DRUMMERS_DIRECTORY .. "_transitions.xml"
+    local file, err = io.open(file_path, "r")
+    if not file then
+        print("Error: Could not open transitions file. Error: " .. (err or "unknown error"))
+        return false
+    end
+    local content = file:read("*a")
+    file:close()
+    self.transitions = self.xmlParser:parse_transitions(content)
     return true
 end
 
@@ -182,6 +197,7 @@ function SongManager:saveSong(filename)
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
+    self:saveTransitions()
 end
 
 function SongManager:saveDrummerPatterns()
@@ -201,6 +217,26 @@ function SongManager:saveDrummerPatterns()
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
+end
+
+function SongManager:saveTransitions()
+    local file_path = self.DRUMMERS_DIRECTORY .. "_transitions.xml"
+    local file, err = io.open(file_path, "w")
+    if not file then
+        print("Error: Could not open transitions file for writing. Error: " .. (err or "unknown error"))
+        return false
+    end
+    file:write("<transitions>\n")
+    for _, matrix in ipairs(self.transitions) do
+        file:write("<transition>\n")
+        for i, value in ipairs(matrix) do
+            file:write(tostring(value) .. (i % 8 == 0 and "\n" or " "))
+        end
+        file:write("</transition>\n")
+    end
+    file:write("</transitions>")
+    file:close()
+    return true
 end
 
 function SongManager:setEditingSceneIndex(index)
