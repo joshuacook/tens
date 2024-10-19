@@ -96,9 +96,12 @@ function init()
             if sixteenthNote == 4 and beat == 4 then
                 songManager.scenePlayCounter = songManager.scenePlayCounter + 1
                 local currentSceneDuration = songManager:getCurrentSceneDuration()
+                displayManager:redraw()
                 if songManager.scenePlayCounter >= currentSceneDuration then
                     songManager:advanceSongPosition()
                     displayManager:updateCurrentScene(songManager:getCurrentSceneIndex())
+                    inputHandler:redrawGrid()
+                    displayManager:redraw()
                 end
             end
             

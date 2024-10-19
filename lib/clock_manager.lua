@@ -131,8 +131,10 @@ end
 function ClockManager:togglePlay()
     if self.isPlaying then
         self:stop()
+        self.songManager.isPlaying = false
     else
         self:start()
+        self.songManager.isPlaying = true
     end
     return self.isPlaying
 end

@@ -23,6 +23,7 @@ function SongManager:init(params, sequenceManager, drumPatternManager, song_file
     self.selectedPairIndex = 1
     self.drummerPatterns = nil
     self.transitions = nil
+    self.isPlaying = false
     self:loadSong(song_file)
 end
 
@@ -260,13 +261,20 @@ function SongManager:getCurrentSceneIndex()
 end
 
 function SongManager:advanceSongPosition()
-    self.songPosition = self.songPosition + 1
-    if self.songPosition > #self.currentSong.song_structure then
-        self.songPosition = 1
-    end
-    self.scenePlayCounter = 0
-    local pair = self.currentSong.song_structure[self.songPosition]
-    self:loadScene(pair.scene)
+    repeat
+        self.songPosition = self.songPosition + 1
+        if self.songPosition > #self.currentSong.song_structure then
+            self.songPosition = 1
+        end
+        self.scenePlayCounter = 0
+        local pair = self.currentSong.song_structure[self.songPosition]
+        if pair and pair.duration > 0 then
+            self:loadScene(pair.scene)
+            break
+        else
+            print("Skipping scene at position " .. self.songPosition .. " due to zero duration")
+        end
+    until false
 end
 
 function SongManager:moveSelectedPairIndex(delta)

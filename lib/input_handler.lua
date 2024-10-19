@@ -1,5 +1,6 @@
 -- lib/input_handler.lua
 local InputHandler = {}
+local duration_brightness = { [0]=0, [1]=4, [2]=8, [3]=12, [4]=15 } 
 local brightnesses = {0, 2, 4, 6, 8, 10, 12, 14, 15}
 
 InputHandler.__index = InputHandler
@@ -19,6 +20,8 @@ function InputHandler:init(params, clockManager, displayManager, sequenceManager
     self.drumPatternManager = drumPatternManager
     self.midiController = midiController
     self.isShiftPressed = false
+    self.flashingState = false 
+    self:startFlashingClock()
 
     self.currentBeat = 1
     self.currentSixteenthNote = 1
@@ -108,6 +111,7 @@ function InputHandler:handleRegularKey(n, z)
                 else
                     self.midiController:sendStop()
                 end
+                self:redrawGrid() 
             end
         elseif n == 3 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
@@ -200,12 +204,58 @@ end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
-        if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+            -- Handle grid press on song page
+            local col = x  -- Position in song_structure
+            local inverted_y = y
+            local scene = 9 - inverted_y  -- Invert the y-axis to get scene index
+            local song_structure = self.songManager.currentSong.song_structure
+            if col <= #song_structure then
+                local pair = song_structure[col]
+                if pair.scene == scene then
+                    -- Same scene, increment duration
+                    pair.duration = (pair.duration + 1) % 5  -- Cycle from 0 to 4
+                    if pair.duration == 0 then
+                        -- Duration is zero, turn off all LEDs in this column
+                        for row = 1, 8 do
+                            self:updateGridLED(col, row, 0)
+                        end
+                    else
+                        -- Update grid LED
+                        local brightness = duration_brightness[pair.duration] or 0
+                        self:updateGridLED(col, inverted_y, brightness)
+                    end
+                else
+                    -- Different scene selected, set scene to new one, reset duration to 1
+                    -- Turn off previous LED in the same column
+                    local prev_scene = pair.scene
+                    local prev_inverted_y = 9 - prev_scene
+                    self:updateGridLED(col, prev_inverted_y, 0)
+                    pair.scene = scene
+                    pair.duration = 1
+                    -- Update grid LED
+                    local brightness = duration_brightness[pair.duration] or 0
+                    self:updateGridLED(col, inverted_y, brightness)
+                end
+            else
+                -- If no existing entry in song_structure, add one
+                song_structure[col] = { scene = scene, duration = 1 }
+                local brightness = duration_brightness[1]
+                self:updateGridLED(col, inverted_y, brightness)
+            end
+            -- Ensure only one LED per column is lit
+            for row = 1, 8 do
+                if row ~= inverted_y then
+                    self:updateGridLED(col, row, 0)
+                end
+            end
+            my_grid:refresh()
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
             local index = (y - 1) * 8 + x
             local currentTransition = self.songManager.transitions[self.displayManager.currentTransitionIndex]
             if currentTransition then
                 local currentValue = currentTransition[index] or 0
-                local newValue = (currentValue + 1) % 9  -- cycle through 0-8
+                local newValue = (currentValue + 1) % 9
                 currentTransition[index] = newValue
                 self:updateGridLED(x, y, newValue)
             end
@@ -214,7 +264,7 @@ function InputHandler:handleGridPress(x, y, z)
             local currentPattern = self.drumPatternManager:getEditingPattern()
             if currentPattern then
                 local currentValue = currentPattern[index] or 0
-                local newValue = (currentValue + 1) % 4  -- cycle through 0-3
+                local newValue = (currentValue + 1) % 4
                 self.drumPatternManager:setPatternStep(self.displayManager.editingPatternIndex, index, newValue)
                 self:updateGridLED(x, y, newValue)
             end
@@ -225,7 +275,7 @@ function InputHandler:handleGridPress(x, y, z)
             local currentSequence = self.sequenceManager.sequences[currentSequenceIndex]
             local index = (y - 1) * 16 + x
             local currentValue = editingScene[currentSequence][index] or 0
-            local newValue = (currentValue + 1) % 4  -- cycle through 0-3
+            local newValue = (currentValue + 1) % 4
             editingScene[currentSequence][index] = newValue
 
             self:updateGridLED(x, y, newValue)
@@ -242,7 +292,29 @@ function InputHandler:redrawGrid()
     my_grid:all(0)
     
     
-    if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+        local song_structure = self.songManager.currentSong.song_structure
+        local currentPosition = self.songManager.songPosition or 1
+        if song_structure then
+            for col = 1, math.min(#song_structure, 16) do
+                local pair = song_structure[col]
+                local duration = pair.duration or 0
+                if duration > 0 then
+                    local scene = pair.scene  -- Scene indices from 1 to 8
+                    local inverted_y = 9 - scene  -- Invert the y-axis
+                    local brightness = duration_brightness[duration] or 0  -- Default to brightness 0
+                    if col == currentPosition and self.songManager.isPlaying then
+                        if self.flashingState then
+                            brightness = 15  -- Maximum brightness when flashing
+                        else
+                            brightness = 0   -- Turn off LED when not flashing
+                        end
+                    end
+                    my_grid:led(col, inverted_y, brightness)
+                end
+            end
+        end
+    elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then
         local currentTransition = self.songManager.transitions[self.displayManager.currentTransitionIndex]
         if currentTransition then
             for y = 1, 8 do
@@ -303,6 +375,22 @@ function InputHandler:updateGridLED(x, y, value)
     end
     my_grid:led(x, y, brightness)
     my_grid:refresh()
+end
+
+function InputHandler:startFlashingClock()
+    if self.flashingClockID == nil then
+        self.flashingClockID = clock.run(function()
+            while true do
+                clock.sync(1/2)  -- Adjust the subdivision as needed
+                if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" and self.songManager.isPlaying then
+                    self.flashingState = not self.flashingState
+                    self:redrawGrid()
+                else
+                    self.flashingState = false
+                end
+            end
+        end)
+    end
 end
 
 return InputHandler
