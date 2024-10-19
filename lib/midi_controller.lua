@@ -65,6 +65,24 @@ function MIDIDevice:sendNote(note, velocity, channel)
     end
 end
 
+function MIDIDevice:sendStart()
+    if self.connection then
+        self.connection:start()
+        print("Sent MIDI Start to device " .. self.name)
+    else
+        print("Error: MIDI device not connected")
+    end
+end
+
+function MIDIDevice:sendStop()
+    if self.connection then
+        self.connection:stop()
+        print("Sent MIDI Stop to device " .. self.name)
+    else
+        print("Error: MIDI device not connected")
+    end
+end
+
 function DrumMachine.new(device, channel, noteMap)
     local self = setmetatable({}, DrumMachine)
     self.device = device
@@ -125,6 +143,18 @@ function MIDIController:updateTempo(bpm)
     -- TODO: Implement MIDI tempo update for each device
     for _, device in ipairs(self.devices) do
         -- Send MIDI clock or other tempo-related messages
+    end
+end
+
+function MIDIController:sendStart()
+    for _, device in ipairs(self.devices) do
+        device:sendStart()
+    end
+end
+
+function MIDIController:sendStop()
+    for _, device in ipairs(self.devices) do
+        device:sendStop()
     end
 end
 

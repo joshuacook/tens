@@ -38,7 +38,7 @@ function init()
     clockManager:init(clock, params, displayManager, songManager)
     
     inputHandler = InputHandler.new()
-    inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager, drumPatternManager)
+    inputHandler:init(params, clockManager, displayManager, sequenceManager, songManager, drumPatternManager, midiController)
 
     clockManager:addListener({
         tick = function()
@@ -47,15 +47,16 @@ function init()
             local transition = songManager.transitions[transitionIndex]
             local probabilities = {}
             local currentPattern = drumPatternManager.playingPatternIndex
+            local cumulativeProbability = 0
             for i = 1, 8 do
-                probabilities[i] = transition[(currentPattern - 1) * 8 + i]
+                local probability = transition[(currentPattern - 1) * 8 + i]
+                cumulativeProbability = cumulativeProbability + probability
+                probabilities[i] = cumulativeProbability
             end
-            local randomValue = math.random() * 8 
+            local randomValue = math.random() * cumulativeProbability
 
-            local search_value = 0
             for i = 1, 8 do
-                search_value = search_value + probabilities[i]
-                if randomValue <= search_value then
+                if randomValue <= probabilities[i] then
                     drumPatternManager:setPlayingPatternIndex(i)
                     if displayManager.pages[displayManager.currentPageIndex] == "drummer" then
                         displayManager.playingPatternIndex = i
@@ -64,8 +65,7 @@ function init()
                     break
                 end
             end
-            
-            print(measure, beat, transitionIndex)
+
             displayManager:updateMeasureCount(measure)
             if displayManager.pages[displayManager.currentPageIndex] == "main" then
                 inputHandler:updateBeat(beat, sixteenthNote)

@@ -142,6 +142,7 @@ function SongManager:loadSong(filename)
         self:loadScene(pair.scene)
     end
 
+    self:loadDrummerPatterns(self.currentSong.drummer)
     self:loadTransitions()
 
     return true
@@ -197,6 +198,7 @@ function SongManager:saveSong(filename)
         print("Error: Could not open file. Error: " .. (err or "unknown error"))
         return false
     end
+    self:saveDrummerPatterns()
     self:saveTransitions()
 end
 

@@ -10,13 +10,14 @@ end
 
 local my_grid = grid.connect()
 
-function InputHandler:init(params, clockManager, displayManager, sequenceManager, songManager, drumPatternManager)
+function InputHandler:init(params, clockManager, displayManager, sequenceManager, songManager, drumPatternManager, midiController)
     self.params = params
     self.clockManager = clockManager
     self.displayManager = displayManager
     self.sequenceManager = sequenceManager
     self.songManager = songManager
     self.drumPatternManager = drumPatternManager
+    self.midiController = midiController
     self.isShiftPressed = false
 
     self.currentBeat = 1
@@ -101,7 +102,12 @@ function InputHandler:handleRegularKey(n, z)
                 self.displayManager.copyToPatternIndex = self.displayManager.editingPatternIndex
                 self.displayManager:redraw()
             else
-                self.clockManager:togglePlay()
+                local isPlaying = self.clockManager:togglePlay()
+                if isPlaying then
+                    self.midiController:sendStart()
+                else
+                    self.midiController:sendStop()
+                end
             end
         elseif n == 3 then
             if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then

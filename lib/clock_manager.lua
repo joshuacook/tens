@@ -134,6 +134,7 @@ function ClockManager:togglePlay()
     else
         self:start()
     end
+    return self.isPlaying
 end
 
 return ClockManager
