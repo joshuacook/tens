@@ -18,7 +18,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager, drumP
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "drummer", "transitions", "sequence", "song","load_save"}
+    self.pages = {"main", "song", "sequence","load_save", "drummer", "transitions"}
     self.currentPageIndex = 1
 
     self.currentFileName = "004.xml"
