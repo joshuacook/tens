@@ -78,7 +78,7 @@ end
 
 function ClockManager:reset()
     self.currentMeasure = 1
-    self.currentBeat = 0
+    self.currentBeat = 1
     self.currentSixteenth = 0
 end
 

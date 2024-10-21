@@ -6,6 +6,7 @@ local InputHandler = include('lib/input_handler')
 local MIDIController = include('lib/midi_controller')
 local SequenceManager = include('lib/sequence_manager')
 local SongManager = include('lib/song_manager')
+local SONG_FILE_PATH = "006.xml"
 
 local function switch_scene()
     local current_scene = songManager:getCurrentSceneIndex()
@@ -29,10 +30,10 @@ function init()
     sequenceManager:init(midiController)
     
     songManager = SongManager.new()
-    songManager:init(params, sequenceManager, drumPatternManager, "005.xml")
+    songManager:init(params, sequenceManager, drumPatternManager, SONG_FILE_PATH)
     
     displayManager = DisplayManager.new()
-    displayManager:init(screen, params, sequenceManager, songManager, drumPatternManager)
+    displayManager:init(SONG_FILE_PATH, screen, params, sequenceManager, songManager, drumPatternManager)
     
     clockManager = ClockManager.new()
     clockManager:init(clock, params, displayManager, songManager)
@@ -74,16 +75,18 @@ function init()
             local stepInMeasure = (beat - 1) * 4 + sixteenthNote
     
             local stepData = sequenceManager:getCurrentStep(measure, beat, sixteenthNote)
-            for seq, drums in pairs(stepData) do
-                local drumMachineIndex = tonumber(seq:sub(5, 5))
-                local isSequenceB = seq:sub(-1) == "b"
-                for drumIndex, value in ipairs(drums) do
-                    if isSequenceB then
-                        drumIndex = drumIndex + 8
-                    end
-                    if value > 0 then
-                        local velocity = math.floor(value * 42)
-                        midiController:sendNote(drumMachineIndex, drumIndex, velocity)
+            if stepData then
+                for seq, drums in pairs(stepData) do
+                    local drumMachineIndex = tonumber(seq:sub(5, 5))
+                    local isSequenceB = seq:sub(-1) == "b"
+                    for drumIndex, value in ipairs(drums) do
+                        if isSequenceB then
+                            drumIndex = drumIndex + 8
+                        end
+                        if value > 0 then
+                            local velocity = math.floor(value * 42)
+                            midiController:sendNote(drumMachineIndex, drumIndex, velocity)
+                        end
                     end
                 end
             end

@@ -139,8 +139,29 @@ function MIDIController:sendNote(drumMachineIndex, sampleIndex, velocity)
     end
 end
 
+function MIDIDevice:sendNoteOnChannel(note, velocity, channel)
+    if self.connection then
+        self.connection:note_on(note, velocity, channel)
+        clock.run(function()
+            clock.sleep(0.1)
+            self.connection:note_off(note, 0, channel)
+        end)
+    else
+        print("Error: MIDI device not connected")
+    end
+end
+
+
+function MIDIController:sendNoteToDevice(deviceIndex, note, velocity, channel)
+    local device = self.devices[deviceIndex]
+    if device then
+        device:sendNoteOnChannel(note, velocity, channel)
+    else
+        print("Error: Invalid device index")
+    end
+end
+
 function MIDIController:updateTempo(bpm)
-    -- TODO: Implement MIDI tempo update for each device
     for _, device in ipairs(self.devices) do
         -- Send MIDI clock or other tempo-related messages
     end

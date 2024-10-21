@@ -274,8 +274,6 @@ function SongManager:advanceSongPosition()
         if pair and pair.duration > 0 then
             self:loadScene(pair.scene)
             break
-        else
-            print("Skipping scene at position " .. self.songPosition .. " due to zero duration")
         end
     until false
 end

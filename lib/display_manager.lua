@@ -6,7 +6,7 @@ function DisplayManager.new()
     return setmetatable({}, DisplayManager)
 end
 
-function DisplayManager:init(screen, params, sequenceManager, songManager, drumPatternManager)
+function DisplayManager:init(SONG_FILE_PATH, screen, params, sequenceManager, songManager, drumPatternManager)
     self.screen = screen
     self.sequenceManager = sequenceManager
     self.songManager = songManager
@@ -21,7 +21,7 @@ function DisplayManager:init(screen, params, sequenceManager, songManager, drumP
     self.pages = {"main", "song", "sequence","load_save", "drummer", "transitions"}
     self.currentPageIndex = 1
 
-    self.currentFileName = "004.xml"
+    self.currentFileName = SONG_FILE_PATH
     self.confirmationModal = {active = false, action = nil, message = ""}
     self.editingScene = 1
     self.editingSequence = nil

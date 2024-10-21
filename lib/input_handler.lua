@@ -3,6 +3,10 @@ local InputHandler = {}
 local duration_brightness = { [0]=0, [1]=4, [2]=8, [3]=12, [4]=15 } 
 local brightnesses = {0, 2, 4, 6, 8, 10, 12, 14, 15}
 
+local clear_midi_notes = { 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 }
+local toggle_record_notes = { 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83 }
+
+
 InputHandler.__index = InputHandler
 
 function InputHandler.new()
@@ -204,7 +208,25 @@ end
 
 function InputHandler:handleGridPress(x, y, z)
     if z == 1 then
-        if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+            local drumMachine = self.midiController.drumMachines[1]
+            local channel = drumMachine and drumMachine.channel or 1
+
+            if x >= 1 and x <= 4 and y >= 5 and y <= 8 then
+                local index = (8 - y) * 4 + x
+                local note = clear_midi_notes[index]
+                if note then
+                    self.midiController:sendNoteToDevice(1, note, 127, channel)
+                end
+            end
+            if x >= 13 and x <= 16 and y >= 5 and y <= 8 then
+                local index = (8 - y) * 4 + (x - 12)
+                local note = toggle_record_notes[index]
+                if note then
+                    self.midiController:sendNoteToDevice(1, note, 127, channel)
+                end
+            end
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
             -- Handle grid press on song page
             local col = x  -- Position in song_structure
             local inverted_y = y
@@ -292,7 +314,25 @@ function InputHandler:redrawGrid()
     my_grid:all(0)
     
     
-    if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+        for x = 1, 16 do
+            my_grid:led(x, 1, 0)
+        end
+        local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
+        my_grid:led(gridColumn, 1, 15)  -- Full brightness on top row
+        
+        for y = 5, 8 do
+            for x = 1, 4 do
+                my_grid:led(x, y, 5)
+            end
+        end
+        
+        for y = 5, 8 do
+            for x = 13, 16 do
+                my_grid:led(x, y, 5)
+            end
+        end
+    elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
         local song_structure = self.songManager.currentSong.song_structure
         local currentPosition = self.songManager.songPosition or 1
         if song_structure then
@@ -325,11 +365,6 @@ function InputHandler:redrawGrid()
                     my_grid:led(x, y, brightness)
                 end
             end
-        end
-    elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
-        local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
-        for y = 1, 8 do
-            my_grid:led(gridColumn, y, 15)  -- Full brightness
         end
     elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
         local currentPattern = self.drumPatternManager:getEditingPattern()

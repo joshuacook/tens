@@ -39,7 +39,9 @@ function SequenceManager:getCurrentStep(measure, beat, sixteenthNote)
             end
         end
     end
-    return result
+    if SequenceManager:shouldAdvanceStep(beat, sixteenthNote) then
+        return result
+    end
 end
 
 function SequenceManager:getSequences()
@@ -86,6 +88,23 @@ function SequenceManager:setStep(sequence, drum, step, value)
         local index = (drum - 1) * 16 + step
         sequenceSteps[index] = value
     end
+end
+
+function SequenceManager:shouldAdvanceStep(beat, sixteenthNote)
+    if sixteenthNote == 1 then
+        if self.measuresPerSequence == 2 then
+            if beat == 1 or beat == 3 then
+                return true
+            end
+        elseif self.measuresPerSequence == 4 then
+            if beat == 1 then
+                return true
+            end
+        else
+            return true
+        end
+    end
+    return false
 end
 
 return SequenceManager
