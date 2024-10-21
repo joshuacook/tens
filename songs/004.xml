@@ -1,6 +1,7 @@
 <title>"Not correct, cool"</title>
 <bpm>90</bpm>
 <drummer>AA</drummer>
+<measures_per_sequence>1</measures_per_sequence>
 <drum_parts>drum1a,drum1b</drum_parts>
 <song_structure>
 01 01  02 01  03 01  01 01  

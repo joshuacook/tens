@@ -17,6 +17,8 @@ function XMLParser:parse_song(content)
     song.title = content:match("<title>%s*(.-)%s*</title>")
     song.bpm = tonumber(content:match("<bpm>(%d+)</bpm>"))
     song.drummer = content:match("<drummer>%s*(.-)%s*</drummer>")
+    song.measures_per_sequence = tonumber(content:match("<measures_per_sequence>(%d+)</measures_per_sequence>")) or 1
+    
     local drum_parts_string = content:match("<drum_parts>(.-)</drum_parts>")
     song.drum_parts = {}
     for part in drum_parts_string:gmatch("[^,]+") do

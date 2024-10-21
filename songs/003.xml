@@ -1,6 +1,8 @@
 <title>"Coyote Movement II"</title>
 <bpm>92</bpm>
-<drum_parts>drum1a,drum1b,drum2a,drum2b</drum_parts>
+<drummer>AA</drummer>
+<measures_per_sequence>1</measures_per_sequence>
+<drum_parts>drum1a,drum1b</drum_parts>
 <scenes>
 <scene>
   <drum1a>

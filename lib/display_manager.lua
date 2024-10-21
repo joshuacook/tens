@@ -106,6 +106,10 @@ function DisplayManager:drawMainPage()
     self.screen.move(0, 30)
     self.screen.text("Playing Scene: " .. (self.songManager:getCurrentSceneIndex() or "N/A"))
 
+    self.screen.move(0, 40)
+    self.screen.text("Measures/Seq: " .. (self.sequenceManager.measuresPerSequence or 1))
+
+
     self.screen.move(0, 50)
     self.screen.text("E2: scene // E3: BPM")
 end

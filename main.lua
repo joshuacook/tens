@@ -71,10 +71,9 @@ function init()
                 inputHandler:updateBeat(beat, sixteenthNote)
             end
 
-    
             local stepInMeasure = (beat - 1) * 4 + sixteenthNote
     
-            local stepData = sequenceManager:getCurrentStep(stepInMeasure)
+            local stepData = sequenceManager:getCurrentStep(measure, beat, sixteenthNote)
             for seq, drums in pairs(stepData) do
                 local drumMachineIndex = tonumber(seq:sub(5, 5))
                 local isSequenceB = seq:sub(-1) == "b"

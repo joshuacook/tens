@@ -65,17 +65,6 @@ function SongManager:getEditingSceneIndex()
     return self.editingSceneIndex
 end
 
-function SongManager:loadScene(sceneIndex)
-    if not self.currentSong or not self.currentSong.scenes[sceneIndex] then
-        print("Error: Invalid scene index")
-        return false
-    end
-
-    local scene = self.currentSong.scenes[sceneIndex]
-    self.sequenceManager:loadScene(scene)
-    return true
-end
-
 function SongManager:loadDrummerPatterns(drummer)
     local full_path = self.DRUMMERS_DIRECTORY .. drummer .. ".xml"
     local file, err = io.open(full_path, "r")
@@ -87,6 +76,17 @@ function SongManager:loadDrummerPatterns(drummer)
     local content = file:read("*a")
     file:close()
     self.drummerPatterns = self.xmlParser:parse_drummer_patterns(content)
+    return true
+end
+
+function SongManager:loadScene(sceneIndex)
+    if not self.currentSong or not self.currentSong.scenes[sceneIndex] then
+        print("Error: Invalid scene index")
+        return false
+    end
+
+    local scene = self.currentSong.scenes[sceneIndex]
+    self.sequenceManager:loadScene(scene)
     return true
 end
 
@@ -111,6 +111,9 @@ function SongManager:loadSong(filename)
 
     self.currentSong = song
     self.currentSong.filename = filename
+    self.measuresPerSequence = self.currentSong.measures_per_sequence or 1
+    self.sequenceManager:setMeasuresPerSequence(self.measuresPerSequence)
+    
     self.sceneCount = #self.currentSong.scenes
 
     if song.drummer then

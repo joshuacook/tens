@@ -12,20 +12,29 @@ function SequenceManager:init(midiController)
     self.sequences = nil
     self.currentSequenceIndex = nil
     self.currentSequence = nil
+    self.measuresPerSequence = 1
 end
 
 function SequenceManager:getCurrentSequenceSteps()
     return self.currentScene[self.currentSequence]
 end
 
-function SequenceManager:getCurrentStep(step)
+function SequenceManager:getCurrentStep(measure, beat, sixteenthNote)
+    local totalTicksInSequence = 16 * self.measuresPerSequence
+    local ticksPerStep = totalTicksInSequence / 16
+    local measureInSequence = (measure - 1) % self.measuresPerSequence
+    local ticksIntoSequence = measureInSequence * 16 + (beat - 1) * 4 + sixteenthNote - 1
+    local stepInSequence = math.floor(ticksIntoSequence / ticksPerStep) + 1
+
+    stepInSequence = ((stepInSequence - 1) % 16) + 1
+
     local result = {}
     for _, seq in ipairs(self.sequences) do
         local sequenceSteps = self.currentScene[seq]
         if sequenceSteps then
             result[seq] = {}
-            for i = 1, 8 do  -- 8 drums per sequence
-                local index = (i - 1) * 16 + step
+            for i = 1, 8 do
+                local index = (i - 1) * 16 + stepInSequence
                 result[seq][i] = sequenceSteps[index] or 0
             end
         end
@@ -61,6 +70,11 @@ function SequenceManager:previousSequence()
     self.currentSequenceIndex = ((self.currentSequenceIndex - 2 + #self.sequences) % #self.sequences) + 1
     self.currentSequence = self.sequences[self.currentSequenceIndex]
 end
+
+function SequenceManager:setMeasuresPerSequence(measuresPerSequence)
+self.measuresPerSequence = measuresPerSequence or 1
+end
+
 
 function SequenceManager:setSequences(sequences)
     self.sequences = sequences
