@@ -18,7 +18,7 @@ function DisplayManager:init(SONG_FILE_PATH, screen, params, sequenceManager, so
     self.measureCount = 1
     self.isPlaying = false
 
-    self.pages = {"main", "song", "sequence","load_save", "drummer", "transitions"}
+    self.pages = {"main", "load_save", "drummer", "transitions"}
     self.currentPageIndex = 1
 
     self.currentFileName = SONG_FILE_PATH
@@ -107,11 +107,11 @@ function DisplayManager:drawMainPage()
     self.screen.text("Playing Scene: " .. (self.songManager:getCurrentSceneIndex() or "N/A"))
 
     self.screen.move(0, 40)
-    self.screen.text("Measures/Seq: " .. (self.sequenceManager.measuresPerSequence or 1))
+    self.screen.text("Song Pos: " .. (self.songManager.songPosition or "N/A"))
 
 
     self.screen.move(0, 50)
-    self.screen.text("E2: scene // E3: BPM")
+    self.screen.text("E3: BPM")
 end
 
 function DisplayManager:drawMetadataPage()
@@ -130,46 +130,6 @@ function DisplayManager:drawMetadataPage()
         self.screen.move(0, 30)
         self.screen.text("No song loaded")
     end
-end
-
-function DisplayManager:drawSequencePage()
-    self.screen.level(15)
-    self.screen.move(0, 10)
-    self.screen.text("Sequence Page")
-    
-    self.screen.move(0, 20)
-    local editingSceneIndex = self.songManager:getEditingSceneIndex()
-    self.screen.text("Editing Scene: " .. editingSceneIndex)
-    
-    self.screen.move(0, 30)
-    local currentSequence = self.sequenceManager.sequences[self.currentSequenceIndex]
-    self.screen.text("Sequence: " .. (currentSequence or "None"))
-    
-    self.screen.move(0, 40)
-    self.screen.text("K3: Add New Scene")
-    
-    self.screen.move(0, 50)
-    self.screen.text("E2: scene // E3: sequence")
-end
-
-function DisplayManager:drawSongPage()
-    self.screen.level(15)
-    self.screen.move(0, 10)
-    self.screen.text("Song Page")
-
-    local songPosition = self.songManager.songPosition or 0
-    self.screen.move(0, 40)
-    self.screen.text("Position: " .. songPosition)
-
-    local currentSceneIndex = self.songManager:getCurrentSceneIndex()
-    self.screen.move(0, 20)
-    self.screen.text("Current Scene: " .. (currentSceneIndex or "N/A"))
-
-    local playCount = self.songManager.scenePlayCounter or 0
-    self.screen.move(0, 30)
-    self.screen.text("Play Count: " .. playCount + 1)
-
-    self.screen.update()
 end
 
 function DisplayManager:drawTransitionsPage()
@@ -221,10 +181,6 @@ function DisplayManager:redraw()
         self:drawDrummerPage()
     elseif currentPage == "metadata" then
         self:drawMetadataPage()
-    elseif currentPage == "sequence" then
-        self:drawSequencePage()
-    elseif currentPage == "song" then
-        self:drawSongPage()
     elseif currentPage == "load_save" then
         self:drawLoadSavePage()
     elseif currentPage == "transitions" then

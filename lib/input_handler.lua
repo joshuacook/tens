@@ -55,16 +55,6 @@ function InputHandler:addNewScene()
     end
 end
 
-function InputHandler:handleKey(n, z)
-    if self.displayManager.confirmationModal.active then
-        self:handleConfirmationModalKey(n, z)
-    elseif self.displayManager.copyPatternModal then
-        self:handleCopyPatternModalKey(n, z)
-    else
-        self:handleRegularKey(n, z)
-    end
-end
-
 function InputHandler:handleConfirmationModalKey(n, z)
     if z == 1 then
         if n == 2 then
@@ -97,42 +87,6 @@ function InputHandler:handleCopyPatternModalKey(n, z)
     end
 end
 
-function InputHandler:handleRegularKey(n, z)
-    if z == 1 then
-        if n == 2 then
-            if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
-                self.displayManager:showConfirmationModal("load", "Load " .. self.displayManager.currentFileName .. "?")
-            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
-                self.songManager:moveSelectedPairIndex(-1)
-                self.displayManager:redraw()
-            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
-                self.displayManager.copyPatternModal = true
-                self.displayManager.copyToPatternIndex = self.displayManager.editingPatternIndex
-                self.displayManager:redraw()
-            else
-                local isPlaying = self.clockManager:togglePlay()
-                if isPlaying then
-                    self.midiController:sendStart()
-                else
-                    self.midiController:sendStop()
-                end
-                self:redrawGrid() 
-            end
-        elseif n == 3 then
-            if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
-                self.displayManager:showConfirmationModal("save", "Save to " .. self.displayManager.currentFileName .. "?")
-            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
-                self.songManager:moveSelectedPairIndex(1)
-                self.displayManager:redraw()
-            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
-                self:addNewScene()
-            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
-                local success = self.songManager:saveDrummerPatterns()
-            end
-        end
-    end
-end
-
 function InputHandler:handleEnc(n, d)
     if n == 1 then
         if d > 0 then
@@ -145,26 +99,6 @@ function InputHandler:handleEnc(n, d)
     elseif n == 2 then
         if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
             self.displayManager:updateFileName(d)
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
-            self.songManager:adjustSelectedPairScene(d)
-            self.displayManager:redraw()
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
-            local sceneCount = self.songManager.sceneCount
-            if sceneCount > 0 then
-                local currentScene = self.songManager:getCurrentSceneIndex()
-                local newScene = (currentScene - 1 + d) % sceneCount + 1
-                self.songManager:loadScene(newScene)
-                self.displayManager:updateCurrentScene(newScene)
-            end
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
-            local sceneCount = self.songManager.sceneCount
-            if sceneCount > 0 then
-                local currentEditingScene = self.songManager:getEditingSceneIndex()
-                local newEditingScene = (currentEditingScene - 1 + d) % sceneCount + 1
-                self.songManager:setEditingSceneIndex(newEditingScene)
-                self.displayManager:updateEditingScene(newEditingScene)
-                self:redrawGrid()
-            end
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
             if self.displayManager.copyPatternModal then
                 self.displayManager.copyToPatternIndex = util.clamp(self.displayManager.copyToPatternIndex + d, 1, 8)
@@ -186,17 +120,6 @@ function InputHandler:handleEnc(n, d)
             local newBPM = util.clamp(self.params:get("clock_tempo") + d, 20, 300)
             self.params:set("clock_tempo", newBPM)
             self.displayManager:updateBPM(newBPM)
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
-            self.songManager:adjustSelectedPairDuration(d)
-            self.displayManager:redraw()
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
-            if d > 0 then
-                self.sequenceManager:nextSequence()
-            else
-                self.sequenceManager:previousSequence()
-            end
-            self.displayManager:updateCurrentSequence(self.sequenceManager.currentSequence)
-            self:redrawGrid()
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
             local newPlayingIndex = util.clamp(self.displayManager.playingPatternIndex + d, 1, 8)
             self.drumPatternManager:setPlayingPatternIndex(newPlayingIndex)
@@ -208,7 +131,11 @@ end
 
 function InputHandler:handleGridPress(x, y, z)
     if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
-        if x >= 13 and x <= 16 and y >= 5 and y <= 8 then
+        if x >= 1 and x <= 12 then
+            if z == 1 then
+                self:handleSongStructureGridPress(x, y)
+            end
+        elseif x >= 13 and x <= 16 and y >= 5 and y <= 8 then
             local key = x .. "," .. y
             if z == 1 then
                 self.gridPresses[key] = {
@@ -314,21 +241,122 @@ function InputHandler:handleGridPress(x, y, z)
     end
 end
 
+function InputHandler:handleKey(n, z)
+    if self.displayManager.confirmationModal.active then
+        self:handleConfirmationModalKey(n, z)
+    elseif self.displayManager.copyPatternModal then
+        self:handleCopyPatternModalKey(n, z)
+    else
+        self:handleRegularKey(n, z)
+    end
+end
+
+function InputHandler:handleRegularKey(n, z)
+    if z == 1 then
+        if n == 2 then
+            if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
+                self.displayManager:showConfirmationModal("load", "Load " .. self.displayManager.currentFileName .. "?")
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+                self.songManager:moveSelectedPairIndex(-1)
+                self.displayManager:redraw()
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
+                self.displayManager.copyPatternModal = true
+                self.displayManager.copyToPatternIndex = self.displayManager.editingPatternIndex
+                self.displayManager:redraw()
+            else
+                local isPlaying = self.clockManager:togglePlay()
+                if isPlaying then
+                    self.midiController:sendStart()
+                else
+                    self.midiController:sendStop()
+                end
+                self:redrawGrid() 
+            end
+        elseif n == 3 then
+            if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
+                self.displayManager:showConfirmationModal("save", "Save to " .. self.displayManager.currentFileName .. "?")
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+                self.songManager:moveSelectedPairIndex(1)
+                self.displayManager:redraw()
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "sequence" then
+                self:addNewScene()
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
+                local success = self.songManager:saveDrummerPatterns()
+            end
+        end
+    end
+end
+
+function InputHandler:handleSongStructureGridPress(x, y)
+    local col = x
+    local inverted_y = y
+    local scene = 9 - inverted_y
+    local song_structure = self.songManager.currentSong.song_structure
+
+    if col <= #song_structure then
+        local pair = song_structure[col]
+        if pair.scene == scene then
+            pair.duration = (pair.duration + 1) % 5
+            if pair.duration == 0 then
+                for row = 1, 8 do
+                    self:updateGridLED(col, row, 0)
+                end
+            else
+                local brightness = duration_brightness[pair.duration] or 0
+                self:updateGridLED(col, inverted_y, brightness)
+            end
+        else
+            local prev_scene = pair.scene
+            local prev_inverted_y = 9 - prev_scene
+            self:updateGridLED(col, prev_inverted_y, 0)
+            pair.scene = scene
+            pair.duration = 1
+            local brightness = duration_brightness[pair.duration] or 0
+            self:updateGridLED(col, inverted_y, brightness)
+        end
+    else
+        song_structure[col] = { scene = scene, duration = 1 }
+        local brightness = duration_brightness[1]
+        self:updateGridLED(col, inverted_y, brightness)
+    end
+    for row = 1, 8 do
+        if row ~= inverted_y then
+            self:updateGridLED(col, row, 0)
+        end
+    end
+    my_grid:refresh()
+end
+
 function InputHandler:redrawGrid()
     if not my_grid then
         print("Grid not initialized")
         return
     end
     my_grid:all(0)
-    
-    
+
     if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
-        for x = 1, 16 do
-            my_grid:led(x, 1, 0)
+        local song_structure = self.songManager.currentSong.song_structure
+        local currentPosition = self.songManager.songPosition or 1
+        if song_structure then
+            for col = 1, math.min(#song_structure, 12) do  -- Use columns 1-12
+                local pair = song_structure[col]
+                local duration = pair.duration or 0
+                if duration > 0 then
+                    local scene = pair.scene
+                    local inverted_y = 9 - scene
+                    local brightness = duration_brightness[duration] or 0
+                    -- Update the condition here
+                    if col == currentPosition and self.clockManager.isPlaying then
+                        if self.flashingState then
+                            brightness = 15  -- Maximum brightness when flashing
+                        else
+                            brightness = 0   -- Turn off LED when not flashing
+                        end
+                    end
+                    my_grid:led(col, inverted_y, brightness)
+                end
+            end
         end
-        local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
-        my_grid:led(gridColumn, 1, 15)
-        
         for y = 5, 8 do
             for x = 13, 16 do
                 my_grid:led(x, y, 5)
@@ -421,8 +449,8 @@ function InputHandler:startFlashingClock()
     if self.flashingClockID == nil then
         self.flashingClockID = clock.run(function()
             while true do
-                clock.sync(1/2)  -- Adjust the subdivision as needed
-                if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" and self.songManager.isPlaying then
+                clock.sleep(0.5)
+                if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" and self.clockManager.isPlaying then
                     self.flashingState = not self.flashingState
                     self:redrawGrid()
                 else
