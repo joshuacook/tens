@@ -30,6 +30,7 @@ function InputHandler:init(params, clockManager, displayManager, sequenceManager
     self.currentBeat = 1
     self.currentSixteenthNote = 1
     self.copyToPatternIndex = 1
+    self.gridPresses = {}
 
     if my_grid then
         my_grid.key = function(x, y, z)
@@ -132,7 +133,6 @@ function InputHandler:handleRegularKey(n, z)
     end
 end
 
-
 function InputHandler:handleEnc(n, d)
     if n == 1 then
         if d > 0 then
@@ -207,26 +207,34 @@ function InputHandler:handleEnc(n, d)
 end
 
 function InputHandler:handleGridPress(x, y, z)
-    if z == 1 then
-        if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
-            local drumMachine = self.midiController.drumMachines[1]
-            local channel = drumMachine and drumMachine.channel or 1
-
-            if x >= 1 and x <= 4 and y >= 5 and y <= 8 then
-                local index = (8 - y) * 4 + x
-                local note = clear_midi_notes[index]
-                if note then
-                    self.midiController:sendNoteToDevice(1, note, 127, channel)
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+        if x >= 13 and x <= 16 and y >= 5 and y <= 8 then
+            local key = x .. "," .. y
+            if z == 1 then
+                self.gridPresses[key] = {
+                    pressedTime = os.clock(),
+                    isHeld = true,
+                    clearMidiSent = false
+                }
+                clock.run(function()
+                    clock.sleep(2)
+                    local press = self.gridPresses[key]
+                    if press and press.isHeld and not press.clearMidiSent then
+                        self:sendClearMidiForButton(x, y)
+                        press.clearMidiSent = true
+                    end
+                end)
+            elseif z == 0 then
+                local press = self.gridPresses[key]
+                if press then
+                    local duration = os.clock() - press.pressedTime
+                    self:sendToggleRecordForButton(x, y)
+                    self.gridPresses[key] = nil
                 end
             end
-            if x >= 13 and x <= 16 and y >= 5 and y <= 8 then
-                local index = (8 - y) * 4 + (x - 12)
-                local note = toggle_record_notes[index]
-                if note then
-                    self.midiController:sendNoteToDevice(1, note, 127, channel)
-                end
-            end
-        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
+        end
+    elseif z == 1 then
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
             -- Handle grid press on song page
             local col = x  -- Position in song_structure
             local inverted_y = y
@@ -319,13 +327,7 @@ function InputHandler:redrawGrid()
             my_grid:led(x, 1, 0)
         end
         local gridColumn = ((self.currentBeat - 1) * 4 + self.currentSixteenthNote)
-        my_grid:led(gridColumn, 1, 15)  -- Full brightness on top row
-        
-        for y = 5, 8 do
-            for x = 1, 4 do
-                my_grid:led(x, y, 5)
-            end
-        end
+        my_grid:led(gridColumn, 1, 15)
         
         for y = 5, 8 do
             for x = 13, 16 do
@@ -395,21 +397,24 @@ function InputHandler:redrawGrid()
     my_grid:refresh()
 end
 
-function InputHandler:updateBeat(beat, sixteenthNote)
-    self.currentBeat = beat
-    self.currentSixteenthNote = sixteenthNote
-    self:redrawGrid()
+function InputHandler:sendClearMidiForButton(x, y)
+    local index = (8 - y) * 4 + (x - 12)
+    local note = clear_midi_notes[index]
+    if note then
+        local drumMachine = self.midiController.drumMachines[1]
+        local channel = drumMachine and drumMachine.channel or 1
+        self.midiController:sendNoteToDevice(1, note, 127, channel)
+    end
 end
 
-function InputHandler:updateGridLED(x, y, value)
-    local brightness
-    if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then        
-        brightness = brightnesses[value + 1]
-    else
-        brightness = value * 5  -- Scale 0-3 to 0-15
+function InputHandler:sendToggleRecordForButton(x, y)
+    local index = (8 - y) * 4 + (x - 12)
+    local note = toggle_record_notes[index]
+    if note then
+        local drumMachine = self.midiController.drumMachines[1]
+        local channel = drumMachine and drumMachine.channel or 1
+        self.midiController:sendNoteToDevice(1, note, 127, channel)
     end
-    my_grid:led(x, y, brightness)
-    my_grid:refresh()
 end
 
 function InputHandler:startFlashingClock()
@@ -426,6 +431,23 @@ function InputHandler:startFlashingClock()
             end
         end)
     end
+end
+
+function InputHandler:updateBeat(beat, sixteenthNote)
+    self.currentBeat = beat
+    self.currentSixteenthNote = sixteenthNote
+    self:redrawGrid()
+end
+
+function InputHandler:updateGridLED(x, y, value)
+    local brightness
+    if self.displayManager.pages[self.displayManager.currentPageIndex] == "transitions" then        
+        brightness = brightnesses[value + 1]
+    else
+        brightness = value * 5  -- Scale 0-3 to 0-15
+    end
+    my_grid:led(x, y, brightness)
+    my_grid:refresh()
 end
 
 return InputHandler

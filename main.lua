@@ -85,7 +85,7 @@ function init()
                         end
                         if value > 0 then
                             local velocity = math.floor(value * 42)
-                            midiController:sendNote(drumMachineIndex, drumIndex, velocity)
+                            -- midiController:sendNote(drumMachineIndex, drumIndex, velocity)
                         end
                     end
                 end
