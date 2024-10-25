@@ -111,6 +111,9 @@ function DisplayManager:drawMainPage()
 
     self.screen.move(0, 50)
     self.screen.text("E2: Edit Scene // E3: BPM")
+
+    self.screen.move(0, 60)
+    self.screen.text("K3: Follow - " .. (self.songManager.autoAdvanceScenes and "ON" or "OFF"))
 end
 
 function DisplayManager:drawMetadataPage()
@@ -191,9 +194,6 @@ function DisplayManager:redraw()
     elseif self.copyPatternModal then
         self:drawCopyPatternModal()
     end
-
-    self.screen.move(0, 60)
-    self.screen.text("Page: " .. currentPage .. " (" .. self.currentPageIndex .. "/" .. #self.pages .. ")")
     
     self.screen.update()
 end

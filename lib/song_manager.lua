@@ -25,6 +25,7 @@ function SongManager:init(params, sequenceManager, drumPatternManager, song_file
     self.transitions = nil
     self.isPlaying = false
     self:loadSong(song_file)
+    self.autoAdvanceScenes = true
 end
 
 function SongManager:addNewScene()

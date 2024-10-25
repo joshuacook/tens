@@ -361,7 +361,10 @@ function InputHandler:handleRegularKey(n, z)
                 self:redrawGrid() 
             end
         elseif n == 3 then
-            if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
+            if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+                self.songManager.autoAdvanceScenes = not self.songManager.autoAdvanceScenes
+                self.displayManager:redraw()
+            elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
                 self.displayManager:showConfirmationModal("save", "Save to " .. self.displayManager.currentFileName .. "?")
             elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
                 self.songManager:moveSelectedPairIndex(1)

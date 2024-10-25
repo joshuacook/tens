@@ -102,9 +102,13 @@ function init()
                 local currentSceneDuration = songManager:getCurrentSceneDuration()
                 displayManager:redraw()
                 if songManager.scenePlayCounter >= currentSceneDuration then
-                    songManager:advanceSongPosition()
-                    displayManager:updateCurrentScene(songManager:getCurrentSceneIndex())
-                    inputHandler:redrawGrid()
+                    if songManager.autoAdvanceScenes then
+                        songManager:advanceSongPosition()
+                        displayManager:updateCurrentScene(songManager:getCurrentSceneIndex())
+                        inputHandler:redrawGrid()
+                    else
+                        songManager.scenePlayCounter = 0
+                    end
                     displayManager:redraw()
                 end
             end
