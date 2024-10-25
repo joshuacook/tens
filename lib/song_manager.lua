@@ -255,7 +255,7 @@ end
 
 function SongManager:getCurrentSceneDuration()
     local pair = self.currentSong.song_structure[self.songPosition]
-    return pair.duration
+    return pair.duration * 4
 end
 
 function SongManager:getCurrentSceneIndex()
