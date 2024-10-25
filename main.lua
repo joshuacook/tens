@@ -74,18 +74,20 @@ function init()
 
             local stepInMeasure = (beat - 1) * 4 + sixteenthNote
     
-            local stepData = sequenceManager:getCurrentStep(measure, beat, sixteenthNote)
-            if stepData then
-                for seq, drums in pairs(stepData) do
-                    local drumMachineIndex = tonumber(seq:sub(5, 5))
-                    local isSequenceB = seq:sub(-1) == "b"
-                    for drumIndex, value in ipairs(drums) do
-                        if isSequenceB then
-                            drumIndex = drumIndex + 8
-                        end
-                        if value > 0 then
-                            local velocity = math.floor(value * 42)
-                            -- midiController:sendNote(drumMachineIndex, drumIndex, velocity)
+            if measure % 4 == 1 then
+                local stepData = sequenceManager:getCurrentStep(measure, beat, sixteenthNote)
+                if stepData then
+                    for seq, drums in pairs(stepData) do
+                        local drumMachineIndex = tonumber(seq:sub(5, 5))
+                        local isSequenceB = seq:sub(-1) == "b"
+                        for drumIndex, value in ipairs(drums) do
+                            if isSequenceB then
+                                drumIndex = drumIndex + 8
+                            end
+                            if value > 0 then
+                                local velocity = math.floor(value * 42)
+                                midiController:sendNote(drumMachineIndex, drumIndex, velocity)
+                            end
                         end
                     end
                 end

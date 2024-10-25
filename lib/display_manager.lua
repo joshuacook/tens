@@ -104,14 +104,13 @@ function DisplayManager:drawMainPage()
 
     local currentSceneIndex = self.songManager:getCurrentSceneIndex()
     self.screen.move(0, 30)
-    self.screen.text("Playing Scene: " .. (self.songManager:getCurrentSceneIndex() or "N/A"))
+    self.screen.text("Current Scene: " .. (currentSceneIndex or "N/A"))
 
     self.screen.move(0, 40)
-    self.screen.text("Song Pos: " .. (self.songManager.songPosition or "N/A"))
-
+    self.screen.text("Editing Scene: " .. (self.editingScene or "N/A"))
 
     self.screen.move(0, 50)
-    self.screen.text("E3: BPM")
+    self.screen.text("E2: Edit Scene // E3: BPM")
 end
 
 function DisplayManager:drawMetadataPage()

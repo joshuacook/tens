@@ -133,6 +133,9 @@ function MIDIController:sendNote(drumMachineIndex, sampleIndex, velocity)
     end
     local drumMachine = self.drumMachines[drumMachineIndex]
     if drumMachine then
+        if drumMachineIndex == 1 then
+            print("Sending note to drum machine " .. drumMachineIndex .. " with sample index " .. sampleIndex .. " and velocity " .. velocity)
+        end
         drumMachine:sendNote(sampleIndex, velocity)
     else
         print("Error: Invalid drum machine index")

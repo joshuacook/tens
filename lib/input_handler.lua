@@ -55,6 +55,47 @@ function InputHandler:addNewScene()
     end
 end
 
+function InputHandler:displayEditingSceneOnGrid()
+    local editingSceneIndex = self.songManager:getEditingSceneIndex()
+    local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
+
+    if editingScene then
+        -- Display drum1b values
+        local drum1b_sequence = editingScene["drum1b"]
+        if drum1b_sequence then
+            for y = 1, 2 do
+                for x = 13, 16 do
+                    local stepIndex
+                    if y == 1 then
+                        stepIndex = 49 - ((x - 13) * 16)
+                    elseif y == 2 then
+                        stepIndex = 113 - ((x - 13) * 16)
+                    end
+                    local value = drum1b_sequence[stepIndex] or 0
+                    my_grid:led(x, y, value * 5)
+                end
+            end
+        end
+
+        -- Display drum1a values
+        local drum1a_sequence = editingScene["drum1a"]
+        if drum1a_sequence then
+            for y = 3, 4 do
+                for x = 13, 16 do
+                    local stepIndex
+                    if y == 3 then
+                        stepIndex = 49 - ((x - 13) * 16)
+                    elseif y == 4 then
+                        stepIndex = 113 - ((x - 13) * 16)
+                    end
+                    local value = drum1a_sequence[stepIndex] or 0
+                    my_grid:led(x, y, value * 5)
+                end
+            end
+        end
+    end
+end
+
 function InputHandler:handleConfirmationModalKey(n, z)
     if z == 1 then
         if n == 2 then
@@ -87,6 +128,43 @@ function InputHandler:handleCopyPatternModalKey(n, z)
     end
 end
 
+function InputHandler:handleEditingSceneGridPress(x, y)
+    local editingSceneIndex = self.songManager:getEditingSceneIndex()
+    local editingScene = self.songManager.currentSong.scenes[editingSceneIndex]
+
+    if editingScene then
+        local drum_part
+        local stepIndex
+
+        if y == 1 or y == 2 then
+            drum_part = "drum1b"
+            if y == 1 then
+                stepIndex = 49 - ((x - 13) * 16)
+            elseif y == 2 then
+                stepIndex = 113 - ((x - 13) * 16)
+            end
+        elseif y == 3 or y == 4 then
+            drum_part = "drum1a"
+            if y == 3 then
+                stepIndex = 49 - ((x - 13) * 16)
+            elseif y == 4 then
+                stepIndex = 113 - ((x - 13) * 16)
+            end
+        end
+
+        if drum_part and stepIndex then
+            local sequence = editingScene[drum_part]
+            if sequence then
+                local currentValue = sequence[stepIndex] or 0
+                local newValue = (currentValue + 1) % 4
+                sequence[stepIndex] = newValue
+                self:updateGridLED(x, y, newValue)
+                self.displayManager.dirty = true
+            end
+        end
+    end
+end
+
 function InputHandler:handleEnc(n, d)
     if n == 1 then
         if d > 0 then
@@ -97,7 +175,13 @@ function InputHandler:handleEnc(n, d)
             self:redrawGrid()
         end
     elseif n == 2 then
-        if self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
+        if self.displayManager.pages[self.displayManager.currentPageIndex] == "main" then
+            local newEditingScene = util.clamp(self.displayManager.editingScene + d, 1, #self.songManager.currentSong.scenes)
+            self.displayManager.editingScene = newEditingScene
+            self.songManager:setEditingSceneIndex(newEditingScene)
+            self.displayManager:updateEditingScene(newEditingScene)
+            self:redrawGrid()
+        elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "load_save" then
             self.displayManager:updateFileName(d)
         elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "drummer" then
             if self.displayManager.copyPatternModal then
@@ -134,6 +218,10 @@ function InputHandler:handleGridPress(x, y, z)
         if x >= 1 and x <= 12 then
             if z == 1 then
                 self:handleSongStructureGridPress(x, y)
+            end
+        elseif x >= 13 and x <= 16 and y >= 1 and y <= 4 then
+            if z == 1 then
+                self:handleEditingSceneGridPress(x, y)
             end
         elseif x >= 13 and x <= 16 and y >= 5 and y <= 8 then
             local key = x .. "," .. y
@@ -362,6 +450,7 @@ function InputHandler:redrawGrid()
                 my_grid:led(x, y, 5)
             end
         end
+        self:displayEditingSceneOnGrid()
     elseif self.displayManager.pages[self.displayManager.currentPageIndex] == "song" then
         local song_structure = self.songManager.currentSong.song_structure
         local currentPosition = self.songManager.songPosition or 1
